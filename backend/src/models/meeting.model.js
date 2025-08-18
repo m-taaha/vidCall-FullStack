@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const meetingSchema = new mongoose.Schema(
   {
-    userid: {
+    userId: {
       type: String,
     },
     meetingCode: {
