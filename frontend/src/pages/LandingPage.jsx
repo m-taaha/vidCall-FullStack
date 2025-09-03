@@ -49,7 +49,7 @@ function LandingPage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 mt-6 justify-center md:justify-start">
               <Link
-                to={"/home"}
+                to={"/auth"}
                 className="bg-indigo-600 px-6 py-3 rounded-lg font-semibold
                 hover:bg-indigo-500 transition"
               >

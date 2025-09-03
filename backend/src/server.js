@@ -25,9 +25,9 @@ app.use(cookieParser());
 
 app.use("/api/v1/user", userRouter);
 
-app.get("/", (req, res) => {
-  res.send(`You hit the / route`);
-});
+// app.get("/", (req, res) => {
+//   res.send(`You hit the / route`);
+// });
 
 server.listen(PORT, () => {
   connectDB();
