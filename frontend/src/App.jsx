@@ -1,5 +1,5 @@
 import {useState} from 'react'
-import Navbar from './components/Navbar';
+import LandingPage from './pages/LandingPage';
 
 
 function App() {
@@ -7,7 +7,7 @@ function App() {
   return (
 
      <div>
-      <Navbar />
+      <LandingPage />
      </div>
 
   );
