@@ -2,7 +2,24 @@ import React, { useState } from 'react'
 
 function Authentication() {
     const [isLogin, setIsLogin] = useState(true); 
+    const [formData, setFormData] = useState({
+        firstName: "",
+        lastName: "",
+        userName: "",
+        email: "",
+        password: "",
+        confirmPassword: ""
+    });
+    // const [error, setError] = useState();
 
+    const handleOnChange = (e) => {
+        const {id , value} = e.target;
+
+        setFormData(prev => ({
+            ...prev, [id]: value
+        }))
+        console.log(id, value)
+    }
 
   return (
     <div className="min-h-screen bg-slate-950 flex items-center justify-center p-6">
@@ -16,7 +33,9 @@ function Authentication() {
         </p>
 
         {/* form  */}
-        <form className="space-y-4">
+        <form className="space-y-4"
+        onSubmit={(e) => e.preventDefault()}
+        >
           {/* only show for register */}
           {!isLogin && (
             <>
@@ -31,8 +50,10 @@ function Authentication() {
                   </label>
                   <input
                     id="firstName"
+                    value={formData.firstName}
                     className="w-full rounded-lg px-4 py-3 bg-white/5 border border-white/10 focus:border-blue-500 focus:outline-none transition-all text-white"
                     placeholder="First Name"
+                    onChange={handleOnChange}
                   />
                 </div>
 
@@ -46,8 +67,10 @@ function Authentication() {
                   </label>
                   <input
                     id="lastName"
+                    value={formData.lastName}
                     className="w-full rounded-lg px-4 py-3 bg-white/5 border border-white/10 focus:border-blue-500 focus:outline-none transition-all text-white"
                     placeholder="Last Name"
+                    onChange={handleOnChange}
                   />
                 </div>
               </div>
@@ -62,23 +85,27 @@ function Authentication() {
                 </label>
                 <input
                   id="userName"
-                  className="w-full rounded-lg px-4 py-3 bg-white/5 border border-white/10 focus:border-blue-500 focus:oultine-none transition-all text-white"
+                  value={formData.userName}
+                  className="w-full rounded-lg px-4 py-3 bg-white/5 border border-white/10 focus:border-blue-500 focus:outline-none transition-all text-white"
                   placeholder="Username"
+                  onChange={handleOnChange}
                 />
               </div>
             </>
           )}
 
           {/* shared fields (always show) */}
-           {/* email container */}
+          {/* email container */}
           <div className="flex flex-col gap-1">
             <label htmlFor="email" className="text-sm text-slate-400 ml-1">
               Email
             </label>
             <input
               id="email"
-              className="w-full rounded-lg px-4 py-3 bg-white/5 border border-white/10 focus:border-blue-500 focus:oultine-none transition-all text-white"
+              value={formData.email}
+              className="w-full rounded-lg px-4 py-3 bg-white/5 border border-white/10 focus:border-blue-500 focus:outline-none transition-all text-white"
               placeholder="spidy@example.com"
+              onChange={handleOnChange}
             />
           </div>
 
@@ -89,15 +116,18 @@ function Authentication() {
             </label>
             <input
               id="password"
-              className="w-full rounded-lg px-4 py-3 bg-white/5 border border-white/10 focus:border-blue-500 focus:oultine-none transition-all text-white"
+              type='password'
+              value={formData.password}
+              className="w-full rounded-lg px-4 py-3 bg-white/5 border border-white/10 focus:border-blue-500 focus:outline-none transition-all text-white"
               placeholder="Password"
+              onChange={handleOnChange}
             />
           </div>
 
           {/* Obly show for register */}
           {!isLogin && (
             <div className="flex flex-col gap-1">
-                {/* confirm password container */}
+              {/* confirm password container */}
               <label
                 htmlFor="confirmPassword"
                 className="text-sm text-slate-400 ml-1"
@@ -106,13 +136,16 @@ function Authentication() {
               </label>
               <input
                 id="confirmPassword"
-                className="w-full rounded-lg px-4 py-3 bg-white/5 border border-white/10 focus:border-blue-500 focus:oultine-none transition-all text-white"
+                type='password'
+                value={formData.confirmPassword}
+                className="w-full rounded-lg px-4 py-3 bg-white/5 border border-white/10 focus:border-blue-500 focus:outline-none transition-all text-white"
                 placeholder="Confirm Password"
+                onChange={handleOnChange}
               />
             </div>
           )}
 
-          <button className="w-full bg-blue-600 hover:blue-700 text-white font-bold py-3 rounded-lg mt-6 transition-all active:scale-[0.98]">
+          <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg mt-6 transition-all active:scale-[0.98]">
             {isLogin ? "Login" : "Submit"}
           </button>
         </form>
