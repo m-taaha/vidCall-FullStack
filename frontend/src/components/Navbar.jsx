@@ -12,23 +12,24 @@ function Navbar() {
 
         {/* right side */}
         <div className=" text-white gap-6  flex items-center font-medium">
-          <Link 
-          to={""}
+          <Link
+            to={"/guest"}
             className="bg-blue-600 hover:bg-blue-700 px-5 py-2.5 rounded-lg font-bold transition-all active:scale-95 shadow-lg shadow-blue-500/20"
           >
             Join as Guest
           </Link>
 
           <Link
-          to={""}
+            to={"/user-auth"}
             className="hover:text-blue-400 transition-colors"
           >
             Register
           </Link>
 
-          <Link  
-          to={""}
-          className="hover:text-blue-400 transition-colors">
+          <Link
+            to={"/user-auth"}
+            className="hover:text-blue-400 transition-colors"
+          >
             Login
           </Link>
         </div>

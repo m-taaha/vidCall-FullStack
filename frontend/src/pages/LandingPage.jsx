@@ -30,7 +30,7 @@ function LandingPage() {
 
             {/* CTA's call to action  */}
             <Link
-              to={""}
+              to={"/user-auth"}
               className="bg-blue-600 hover:bg-blue-700 px-5 py-2.5 rounded-lg font-bold transition-all active:scale-95 shadow-lg shadow-blue-500/20"
             >
               Get Started
