@@ -17,17 +17,8 @@ export const AuthContextProvider = ({children}) => {
     const register = async (formData) => {
         setLoading(true); 
         try {
+          const res =  await client.post("/register", formData);
             
-            const payload = {
-                name: `${formData.firstName} ${formData.lastName}`.trim(),
-                username: formData.username,
-                email: formData.email,
-                password: formData.password
-            };
-
-          const res =  await client.post("/register", payload);
-            
-            setUser(res.data.user);
             return {success: true}
 
         } catch(error) {

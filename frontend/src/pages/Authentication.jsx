@@ -1,17 +1,20 @@
 import React, { useState } from 'react'
 import { AuthContext, useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
+
 
 function Authentication() {
-    const [isLogin, setIsLogin] = useState(true); 
-    const [formData, setFormData] = useState({
-        firstName: "",
-        lastName: "",
-        username: "",
-        email: "",
-        password: "",
-        confirmPassword: ""
-    });
-    // const [error, setError] = useState();
+  const navigate = useNavigate();
+  const [isLogin, setIsLogin] = useState(true); 
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    username: "",
+    email: "",
+    password: "",
+    confirmPassword: ""
+  });
+  // const [error, setError] = useState();
 
 //using authcontext and destructuring the objects from authcontext -
     const {loading, register , login , user} = useAuth(AuthContext);
@@ -43,7 +46,7 @@ function Authentication() {
       } else {
         // login logic
         const result = await login({
-          eamil: formData.email,
+          email: formData.email,
           password: formData.password
         });
         
