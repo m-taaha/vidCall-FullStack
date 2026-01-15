@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { AuthContext, useAuth } from '../context/AuthContext';
 
 function Authentication() {
     const [isLogin, setIsLogin] = useState(true); 
@@ -11,6 +12,9 @@ function Authentication() {
         confirmPassword: ""
     });
     // const [error, setError] = useState();
+
+//using authcontext and destructuring the objects from authcontext -
+    const {loading, navigate, register , login , user} = useAuth(AuthContext);
 
     const handleOnChange = (e) => {
         const {id , value} = e.target;

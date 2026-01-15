@@ -10,7 +10,7 @@ const client = axios.create({
 });
 
 export const AuthContextProvider = ({children}) => {
-    const [user, setUser] = useState();
+    const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(false);
     const navigatge = useNavigate();
 
@@ -26,7 +26,7 @@ export const AuthContextProvider = ({children}) => {
                 password: formData.password
             };
 
-            await client.post("/register", payload);
+          const res =  await client.post("/register", payload);
             
             setUser(res.data.user);
             return {success: true}
@@ -61,3 +61,17 @@ export const AuthContextProvider = ({children}) => {
         </AuthContext.Provider>
     )
 }
+
+
+
+
+    // custom hook to easily use the context
+    export const useAuth = () => {
+        const context = useContext(AuthContext);
+
+        if(context === undefined) {
+            throw new Error("useAuth must be used within an AuthProvider");
+        }
+        return context;
+    }
+
