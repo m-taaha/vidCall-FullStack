@@ -16,7 +16,7 @@ export const userRegister = async (req, res) => {
       });
     }
 
-    const { name, username, email, password } = validation.data;
+    const { firstName, lastName, username, email, password } = validation.data;
 
     //check if userExists or not
     const userExist = await User.findOne({ email });
@@ -29,7 +29,8 @@ export const userRegister = async (req, res) => {
     //create the new user - password will be hashed form pre save hook from models
 
     const newUser = await User.create({
-      name,
+      firstName,
+      lastName,
       username,
       email,
       password,
@@ -38,7 +39,7 @@ export const userRegister = async (req, res) => {
     return res.status(201).json({
       message: `User registered successfully`,
       id: newUser._id,
-      name: newUser.name,
+      name: `${newUser.firstName} ${newUser.lastName}`,
       email: newUser.email,
       createdAt: newUser.createdAt,
     });
@@ -93,7 +94,7 @@ export const userLogin = async (req, res) => {
       message: `Login Successfull`,
       user: {
         id: user._id,
-        name: user.name,
+        name: `${user.firstName} ${user.lastName}`,
         email: user.email,
       },
     });

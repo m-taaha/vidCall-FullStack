@@ -1,9 +1,16 @@
 import { z } from "zod";
 
 export const registerUserSchema = z.object({
-  name: z
+  firstName: z
     .string({
-      required_error: `Name is required`,
+      required_error: `First Name is required`,
+    })
+    .trim()
+    .min(1, { message: `Name cannot be empty` }),
+
+  lastName: z
+    .string({
+      required_error: `Last Name is required`,
     })
     .trim()
     .min(1, { message: `Name cannot be empty` }),
