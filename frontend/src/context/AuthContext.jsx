@@ -1,18 +1,17 @@
 import { createContext, useContext, useState} from "react";
 import axios from 'axios';
-import { useNavigate } from "react-router-dom";
 
 
 
 export const AuthContext = createContext();
 const client = axios.create({
   baseURL: "http://localhost:3000/api/v1/user",
+  withCredentials: true, //allowing cookies to be sent/recieved
 });
 
 export const AuthContextProvider = ({children}) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(false);
-    const navigatge = useNavigate();
 
 // register function
     const register = async (formData) => {
@@ -48,7 +47,9 @@ export const AuthContextProvider = ({children}) => {
             setUser(res.data.user);
             return { success: true };
         } catch (error) {
-            throw error;
+            return { success: false,
+                message: error.response?.data.message || "Login failed"
+            }
         } finally {
             setLoading(false);
         }
@@ -56,7 +57,7 @@ export const AuthContextProvider = ({children}) => {
 
 
     return (
-        <AuthContext.Provider value={{user, register,  login, loading , navigatge }}>
+        <AuthContext.Provider value={{user, register,  login, loading}}>
             {children}
         </AuthContext.Provider>
     )

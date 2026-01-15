@@ -14,7 +14,7 @@ function Authentication() {
     // const [error, setError] = useState();
 
 //using authcontext and destructuring the objects from authcontext -
-    const {loading, navigate, register , login , user} = useAuth(AuthContext);
+    const {loading, register , login , user} = useAuth(AuthContext);
 
     const handleOnChange = (e) => {
         const {id , value} = e.target;
@@ -24,6 +24,39 @@ function Authentication() {
         }))
         console.log(id, value)
     }
+
+    const handleSubmit = async (e) => {
+      e.preventDefault();
+
+      // registeration and validation
+      if(!isLogin) {
+        if (formData.password !== formData.confirmPassword) {
+          alert("Password do not match!");
+          return;
+        }
+
+        const result = await register(formData);
+        if (result.success) {
+          setIsLogin(true); //switch to login
+          alert("Registeration successful! Please login.");
+        } 
+      } else {
+        // login logic
+        const result = await login({
+          eamil: formData.email,
+          password: formData.password
+        });
+        
+        if(result.success) {
+          navigate("/");  // TODO: WILL CHANGE THIS TO DASHBOARD LATER
+        } else {
+          alert(result.message);
+        }
+      }
+
+    }
+
+
 
   return (
     <div className="min-h-screen bg-slate-950 flex items-center justify-center p-6">
@@ -38,7 +71,7 @@ function Authentication() {
 
         {/* form  */}
         <form className="space-y-4"
-        onSubmit={(e) => e.preventDefault()}
+        onSubmit={handleSubmit}
         >
           {/* only show for register */}
           {!isLogin && (
@@ -149,8 +182,10 @@ function Authentication() {
             </div>
           )}
 
-          <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg mt-6 transition-all active:scale-[0.98]">
-            {isLogin ? "Login" : "Submit"}
+          <button 
+          disabled={loading} 
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg mt-6 transition-all active:scale-[0.98]">
+            {loading ? "Processing..." : (isLogin ? "Login" : "Submit")}
           </button>
         </form>
 
