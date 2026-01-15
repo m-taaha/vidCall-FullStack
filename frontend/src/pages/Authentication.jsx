@@ -5,7 +5,7 @@ function Authentication() {
     const [formData, setFormData] = useState({
         firstName: "",
         lastName: "",
-        userName: "",
+        username: "",
         email: "",
         password: "",
         confirmPassword: ""
@@ -84,8 +84,8 @@ function Authentication() {
                   Username
                 </label>
                 <input
-                  id="userName"
-                  value={formData.userName}
+                  id="username"
+                  value={formData.username}
                   className="w-full rounded-lg px-4 py-3 bg-white/5 border border-white/10 focus:border-blue-500 focus:outline-none transition-all text-white"
                   placeholder="Username"
                   onChange={handleOnChange}
