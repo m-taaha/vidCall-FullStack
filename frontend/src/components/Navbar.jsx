@@ -20,7 +20,7 @@ function Navbar() {
           </Link>
 
           <Link
-            to={"/user-auth"}
+            to={"/user-auth?mode=register"}
             className="hover:text-blue-400 transition-colors"
           >
             Register

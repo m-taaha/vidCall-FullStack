@@ -1,11 +1,13 @@
 import React, { useState } from 'react'
 import { AuthContext, useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 
 function Authentication() {
+  const [searchParams] = useSearchParams();
+  const initialMode = searchParams.get('mode') === 'register' ? false : true;  //showing form according to the button
   const navigate = useNavigate();
-  const [isLogin, setIsLogin] = useState(true); 
+  const [isLogin, setIsLogin] = useState(initialMode); 
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
