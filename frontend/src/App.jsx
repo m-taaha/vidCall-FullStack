@@ -4,6 +4,7 @@ import GuestPage from './pages/GuestPage';
 import ErrorPage from './pages/ErrorPage';
 import { Routes , Route } from 'react-router-dom';
 import Authentication from './pages/Authentication';
+import Dashboard from './pages/Dashboard';
 
 
 function App() {
@@ -14,6 +15,7 @@ function App() {
         <Route path='/' element={<LandingPage />} />
         <Route path='/user-auth' element={<Authentication />} />
         <Route path='/guest' element={<GuestPage />} />
+        <Route path='/dashboard' element={<Dashboard />} />
 
 
         {/* error-page for unrecognized url parameters */}

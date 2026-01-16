@@ -102,3 +102,11 @@ export const userLogin = async (req, res) => {
     return res.status(500).json({ message: `Server Error` });
   }
 };
+
+
+export const userLogout = async (req, res) => {
+  res.cookie("userToken", "", {maxAge: 0}); //deletes the cookie immediately 
+  return res.status(200).json({
+    message: "Logged out successfully"
+  })
+}

@@ -53,7 +53,7 @@ function Authentication() {
         });
         
         if(result.success) {
-          navigate("/");  // TODO: WILL CHANGE THIS TO DASHBOARD LATER
+          navigate("/dashboard");  // TODO: WILL CHANGE THIS TO DASHBOARD LATER
         } else {
           alert(result.message);
         }
