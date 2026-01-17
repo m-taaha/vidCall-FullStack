@@ -5,6 +5,7 @@ import ErrorPage from './pages/ErrorPage';
 import { Routes , Route } from 'react-router-dom';
 import Authentication from './pages/Authentication';
 import Dashboard from './pages/Dashboard';
+import ProtectedRoute from './routes/ProtectedRoute';
 
 
 function App() {
@@ -12,14 +13,22 @@ function App() {
   return (
     <div>
       <Routes>
-        <Route path='/' element={<LandingPage />} />
-        <Route path='/user-auth' element={<Authentication />} />
-        <Route path='/guest' element={<GuestPage />} />
-        <Route path='/dashboard' element={<Dashboard />} />
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/user-auth" element={<Authentication />} />
+        <Route path="/guest" element={<GuestPage />} />
 
+        {/* Protect the Dashboard */}
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
 
         {/* error-page for unrecognized url parameters */}
-        <Route path='*' element={<ErrorPage />} />
+        <Route path="*" element={<ErrorPage />} />
       </Routes>
     </div>
   );

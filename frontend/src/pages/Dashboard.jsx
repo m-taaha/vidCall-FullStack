@@ -2,7 +2,14 @@ import React from 'react'
 import { AuthContext, useAuth } from '../context/AuthContext'
 
 function Dashboard() {
-    const {user} = useAuth(AuthContext);
+    const {user, logout} = useAuth();
+    // handleLogout
+    const handleLogout = () => {
+      logout()
+    }
+
+
+
 
   return (
     <div className="flex h-screen bg-slate-950 text-white">
@@ -30,7 +37,12 @@ function Dashboard() {
             Welcome back,{" "}
             <span className="text-white font-bold">{user?.name}</span>!
           </h2>
-          {/* profile/logout will go here */}
+
+          <button 
+          onClick={handleLogout}
+          className='border border-red-500/50 text-red-500  hover:bg-red-500 hover:text-white px-4 py-2 rounded-lg transition-all active:scale-95 font-medium '>
+            Logout
+          </button>
         </header>
 
 

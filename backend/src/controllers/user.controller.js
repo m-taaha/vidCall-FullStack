@@ -4,6 +4,7 @@ import {
   registerUserSchema,
   loginUserSchema,
 } from "../validators/user.validator.js";
+import { success } from "zod";
 
 export const userRegister = async (req, res) => {
   try {
@@ -107,6 +108,27 @@ export const userLogin = async (req, res) => {
 export const userLogout = async (req, res) => {
   res.cookie("userToken", "", {maxAge: 0}); //deletes the cookie immediately 
   return res.status(200).json({
+    success: true,
     message: "Logged out successfully"
   })
+}
+
+export const userGetMe =  async (req, res) => {
+  try{
+    const user = await User.findById(req.user._id).select("-password")
+    return res.status(200).json({
+      success: true,
+      user: {
+        id: user._id,
+        name: `${user.firstName} ${user.lastName}`,
+        email: user.email,
+        firstName: user.firstName
+      }
+    })
+  } catch(error) {
+    console.log("Error in userGetMe", error);
+    return res.status(500).json({
+      message: "Server Error"
+    })
+  }
 }
