@@ -17,7 +17,8 @@ export const AuthContextProvider = ({children}) => {
     const register = async (formData) => {
         setLoading(true); 
         try {
-          const res =  await client.post("/register", formData);
+            const {confirmPassword, ...registerData} = formData;
+          const res =  await client.post("/register", registerData);
             
             return {success: true}
 
@@ -52,7 +53,6 @@ export const AuthContextProvider = ({children}) => {
         try{
             await client.post("/logout");
             setUser(null);
-            navigate("/");
             return { success: true }
 
         } catch(error) {

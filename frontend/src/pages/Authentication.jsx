@@ -27,7 +27,6 @@ function Authentication() {
         setFormData(prev => ({
             ...prev, [id]: value
         }))
-        console.log(id, value)
     }
 
     const handleSubmit = async (e) => {
@@ -53,7 +52,7 @@ function Authentication() {
         });
         
         if(result.success) {
-          navigate("/dashboard");  // TODO: WILL CHANGE THIS TO DASHBOARD LATER
+          navigate("/dashboard")
         } else {
           alert(result.message);
         }
@@ -120,7 +119,7 @@ function Authentication() {
               {/* username container */}
               <div className="flex flex-col gap-1">
                 <label
-                  htmlFor="userName"
+                  htmlFor="username"
                   className="text-sm text-slate-400 ml-1"
                 >
                   Username

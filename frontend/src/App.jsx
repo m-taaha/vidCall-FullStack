@@ -6,6 +6,7 @@ import { Routes , Route } from 'react-router-dom';
 import Authentication from './pages/Authentication';
 import Dashboard from './pages/Dashboard';
 import ProtectedRoute from './routes/ProtectedRoute';
+import GreenRoom from './pages/GreenRoom';
 
 
 function App() {
@@ -24,6 +25,13 @@ function App() {
             <ProtectedRoute>
               <Dashboard />
             </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/green-room/:id"
+          element={
+              <GreenRoom />
           }
         />
 

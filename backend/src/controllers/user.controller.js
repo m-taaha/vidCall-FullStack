@@ -45,7 +45,7 @@ export const userRegister = async (req, res) => {
       createdAt: newUser.createdAt,
     });
   } catch (error) {
-    return res.status(500).json({ message: `Server Error` });
+    return res.status(500).json({ message: error.message});
   }
 };
 
