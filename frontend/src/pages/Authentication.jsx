@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { AuthContext, useAuth } from '../context/AuthContext';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
@@ -21,6 +21,19 @@ function Authentication() {
 //using authcontext and destructuring the objects from authcontext -
     const {loading, register , login , user} = useAuth(AuthContext);
 
+    // applying auth guard if a user is already logged in keep the user away from the logged in page or register 
+    useEffect(() => {
+      // only act if are not loading anymore
+      if(!loading) {
+        if(user) {
+          // if user exists, send them to the dashboard
+          navigate("/dashboard");
+        }
+      }
+    }, [user, loading, navigate])
+
+
+    // handle on change 
     const handleOnChange = (e) => {
         const {id , value} = e.target;
 
@@ -29,6 +42,7 @@ function Authentication() {
         }))
     }
 
+    // handle submit
     const handleSubmit = async (e) => {
       e.preventDefault();
 
