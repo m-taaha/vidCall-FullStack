@@ -42,7 +42,7 @@ function GreenRoom() {
     };
 
     startStream();
-
+    
     // clean up --- Stopping the Tracks. Every mediaStream object has a method called getTracks() that returns an array of all active tracks (like your video and audio).
     return () => {
       if (localStream) {
@@ -55,11 +55,9 @@ function GreenRoom() {
   // handling the tracks using .enabled property - to match the toggling of the state of audio and video basically --
 // mathcing hardware to button state
 useEffect(() => {
-  if(camera === true) {
+  // only proceed if stream is not null
+  if(stream) {
     stream.getVideoTracks().forEach((track) => (track.enabled = camera));
-  }
-
-  if(audio === true) {
     stream.getAudioTracks().forEach((track) => (track.enabled = audio));
   }
 }, [camera, audio, stream]); 
@@ -114,11 +112,11 @@ useEffect(() => {
             className={`p-4 rounded-full transition-all ${camera ? "bg-slate-800 hover:bg-slate-700" : "bg-red-500 hover:bg-red-600"}`}
             onClick={() => setCamera(!camera)}
           >
-            {camera ? <FaVideo size={24} /> : <FaVideoSlash size={24}/>}
+            {camera ? <FaVideo size={24} /> : <FaVideoSlash size={24} />}
           </button>
 
           {/* join button */}
-          <button className='bg-slate-600 hover:bg-blue-700 px-8 py-3 rounded-lg font-bold transition-all active:scale-95'>
+          <button className="bg-blue-600 hover:bg-blue-500 px-10 py-3 rounded-xl font-bold transition-all shadow-lg shadow-blue-500/20 active:scale-95">
             Join Meeting
           </button>
         </div>
