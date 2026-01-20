@@ -66,38 +66,62 @@ useEffect(() => {
 
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white p-8">
-      <h1 className="text-3xl font-bold mb-4">Green Room</h1>
-      <p>
-        Meeting ID: <span className="text-blue-400 font-mono">{id}</span>
-      </p>
+    <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center justify-center p-6">
+      <div className="w-full max-w-3xl space-y-6">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold mb-2">Ready to join?</h1>
+          <p className="text-slate-400">
+            Meeting ID: <span className="text-blue-400 font-mono">{id}</span>
+          </p>
+        </div>
 
-      {/* TODO: will build the preview and controls here */}
-      <div className="max-w-2xl mx-auto aspect-video bg-slate-900 rounded-2xl border border-white/10 overflow-hidden relative">
-        <video
-          ref={videoRef}
-          autoPlay
-          playsInline
-          muted //muted teh preview to prevent feeback loops!
-          className="w-full h-full object-cover"
-        />
+        {/* Video preview container */}
+        <div className="aspect-video bg-slate-900 rounded-2xl border border-white/10 overflow-hidden relative shadow-2xl">
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            muted //muted teh preview to prevent feeback loops!
+            className="w-full h-full object-cover"
+          />
 
-        {!camera && (
-          <div className="absolute inset-0 flex items-center justify-center bg-slate-900">
-            <p className="text-slate-500">Camera is turned off</p>
-          </div>
-        )}
-      </div>
+          {!camera && (
+            <div className="absolute inset-0 flex items-center justify-center bg-slate-900/90 backdrop-blur-sm">
+              <div className="text-center">
+                <FaVideoSlash className="text-5xl text-slate-600 mx-auto mb-2" />
+                <p className="text-slate-400">Your camera is off</p>
+              </div>
+            </div>
+          )}
+        </div>
 
-      {/* TODO: add the join button and toggle switches below this  */}
-      <div>
-        <button onClick={() => setCamera(!camera)}>
-          {camera ? <FaVideo /> : <FaVideoSlash />}
-        </button>
+        {/* Controls */}
+        <div className="flex items-center justify-center gap-4">
+          {/* audio button */}
+          <button
+            onClick={() => setAudio(!audio)}
+            className={`p-4 rounded-full transition-all ${audio ? `bg-slate-800 hover:bg-slate-700` : `bg-red-500 hover:bg-red-600`}`}
+          >
+            {audio ? (
+              <FaMicrophone size={24} />
+            ) : (
+              <FaMicrophoneSlash size={24} />
+            )}
+          </button>
 
-        <button onClick={()=> setAudio(!audio)}>
-          {audio ? <FaMicrophone/> : <FaMicrophoneSlash />}
-        </button>
+          {/* camera button */}
+          <button
+            className={`p-4 rounded-full transition-all ${camera ? "bg-slate-800 hover:bg-slate-700" : "bg-red-500 hover:bg-red-600"}`}
+            onClick={() => setCamera(!camera)}
+          >
+            {camera ? <FaVideo size={24} /> : <FaVideoSlash size={24}/>}
+          </button>
+
+          {/* join button */}
+          <button className='bg-slate-600 hover:bg-blue-700 px-8 py-3 rounded-lg font-bold transition-all active:scale-95'>
+            Join Meeting
+          </button>
+        </div>
       </div>
     </div>
   );
