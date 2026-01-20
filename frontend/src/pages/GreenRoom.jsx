@@ -1,5 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
+import {
+  FaVideo,
+  FaVideoSlash,
+  FaMicrophone,
+  FaMicrophoneSlash,
+} from "react-icons/fa6";
 
 
 function GreenRoom() {
@@ -7,7 +13,6 @@ function GreenRoom() {
   const {id} = useParams();
   const [audio, setAudio] = useState(true);
   const [camera, setCamera] = useState(true);
-  
   // this ref will hold our video element
   const videoRef = useRef(null);
 
@@ -20,6 +25,7 @@ function GreenRoom() {
 
   const [stream, setStream] = useState(null); //to manipulate the stream - like when user leaves or toggle 
 
+  // initial setup : request media
   useEffect(() => {
     let localStream; 
     const startStream = async () => {
@@ -46,37 +52,55 @@ function GreenRoom() {
   }, [])
 
 
+  // handling the tracks using .enabled property - to match the toggling of the state of audio and video basically --
+// mathcing hardware to button state
+useEffect(() => {
+  if(camera === true) {
+    stream.getVideoTracks().forEach((track) => (track.enabled = camera));
+  }
+
+  if(audio === true) {
+    stream.getAudioTracks().forEach((track) => (track.enabled = audio));
+  }
+}, [camera, audio, stream]); 
 
 
   return (
-    <div className='min-h-screen bg-slate-950 text-white p-8'>
-      <h1 className='text-3xl font-bold mb-4'>Green Room</h1>
-        <p>
-          Meeting ID: <span className='text-blue-400 font-mono'>{id}</span>
-        </p>
+    <div className="min-h-screen bg-slate-950 text-white p-8">
+      <h1 className="text-3xl font-bold mb-4">Green Room</h1>
+      <p>
+        Meeting ID: <span className="text-blue-400 font-mono">{id}</span>
+      </p>
 
-
-        {/* TODO: will build the preview and controls here */}
-        <div className='max-w-2xl mx-auto aspect-video bg-slate-900 rounded-2xl border border-white/10 overflow-hidden relative'>
-          <video
+      {/* TODO: will build the preview and controls here */}
+      <div className="max-w-2xl mx-auto aspect-video bg-slate-900 rounded-2xl border border-white/10 overflow-hidden relative">
+        <video
           ref={videoRef}
           autoPlay
           playsInline
           muted //muted teh preview to prevent feeback loops!
-          className='w-full h-full object-cover'
-          />
+          className="w-full h-full object-cover"
+        />
 
-          { !camera && (
-            <div className='absolute inset-0 flex items-center justify-center bg-slate-900'>
-              <p className='text-slate-500'>Camera is turned off</p>
-            </div>
-          )}
-        </div>
+        {!camera && (
+          <div className="absolute inset-0 flex items-center justify-center bg-slate-900">
+            <p className="text-slate-500">Camera is turned off</p>
+          </div>
+        )}
+      </div>
 
+      {/* TODO: add the join button and toggle switches below this  */}
+      <div>
+        <button onClick={() => setCamera(!camera)}>
+          {camera ? <FaVideo /> : <FaVideoSlash />}
+        </button>
 
-        {/* TODO: add the join button and toggle switches below this  */}
+        <button onClick={()=> setAudio(!audio)}>
+          {audio ? <FaMicrophone/> : <FaMicrophoneSlash />}
+        </button>
+      </div>
     </div>
-  )
+  );
 }
 
 export default GreenRoom
