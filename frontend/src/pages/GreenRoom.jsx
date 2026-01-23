@@ -1,18 +1,21 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import {
   FaVideo,
   FaVideoSlash,
   FaMicrophone,
   FaMicrophoneSlash,
 } from "react-icons/fa6";
+import { useMeeting } from '../context/MeetingContext';
 
 
 function GreenRoom() {
+  const navigate = useNavigate();
   // destructure the 'id' property from useParams
   const {id} = useParams();
-  const [audio, setAudio] = useState(true);
-  const [camera, setCamera] = useState(true);
+  //using meetingContext 
+  const { audio, setAudio, camera, setCamera } = useMeeting();
+
   // this ref will hold our video element
   const videoRef = useRef(null);
 
@@ -61,6 +64,11 @@ useEffect(() => {
     stream.getAudioTracks().forEach((track) => (track.enabled = audio));
   }
 }, [camera, audio, stream]); 
+
+// handleJoin
+const handleJoin = () => {
+  navigate(`/meeting-room/${id}`);
+}
 
 
   return (
@@ -116,7 +124,9 @@ useEffect(() => {
           </button>
 
           {/* join button */}
-          <button className="bg-blue-600 hover:bg-blue-500 px-10 py-3 rounded-xl font-bold transition-all shadow-lg shadow-blue-500/20 active:scale-95">
+          <button className="bg-blue-600 hover:bg-blue-500 px-10 py-3 rounded-xl font-bold transition-all shadow-lg shadow-blue-500/20 active:scale-95"
+          onClick={handleJoin}
+          >
             Join Meeting
           </button>
         </div>

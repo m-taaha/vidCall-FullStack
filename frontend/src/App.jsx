@@ -7,6 +7,7 @@ import Authentication from './pages/Authentication';
 import Dashboard from './pages/Dashboard';
 import ProtectedRoute from './routes/ProtectedRoute';
 import GreenRoom from './pages/GreenRoom';
+import MeetingRoom from './pages/MeetingRoom';
 
 
 function App() {
@@ -28,12 +29,14 @@ function App() {
           }
         />
 
-        <Route
-          path="/green-room/:id"
-          element={
-              <GreenRoom />
-          }
-        />
+        <Route 
+        path="/green-room/:id" 
+        element={<GreenRoom />} />
+
+
+        <Route 
+        path="/meeting-room/:id" 
+        element={<MeetingRoom />} />
 
         {/* error-page for unrecognized url parameters */}
         <Route path="*" element={<ErrorPage />} />
