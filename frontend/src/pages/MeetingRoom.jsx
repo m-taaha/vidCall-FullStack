@@ -63,15 +63,49 @@ function MeetingRoom() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white">
-      <div className="aspect-video bg-slate-900 rounded-2xl border border-white/10 overflow-hidden relative shadow-2xl">
-        <video
-          ref={videoRef}
-          autoPlay
-          playsInline
-          muted
-          className="w-full h-full object-cover"
-        />
+    <div className="min-h-screen bg-slate-950 text-white p-4 pb-32">
+      {/* main video grid */}
+      <div
+        className={`grid gap-4 h-[calc(100vh-160px)] w-full max-w-7xl mx-auto 
+        ${/* we will add dynamically cahnge this later, but for now; */ "grid-cols-1 md:grid-cols-2"}`}
+      >
+        {/* local video tile (host- you) */}
+        <div className="relative bg-slate-900 rounded-3xl border border-white/10 overflow-hidden shadow-2xl group">
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            muted
+            className="w-full h-full object-cover -scale-x-100" //mirrors my own video
+          />
+
+          {/* overdflow for name/status */}
+          <div className="absolute bottom-4 left-4 bg-black/50 backdrop:blur-md px-3 py-1 rounded-lg text-sm border border-white/10">
+            You
+          </div>
+
+          {/* if camera is off, show placeholder */}
+          {!camera && (
+            <div className='absolute inset-0 flex items-center justify-center bg-slate-800'>
+              <div className="w-24 h-24 bg-slate-700 rounded-full flex items-center justify-center text-3xl font-bold">
+                U
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* remote video placeholder (wait for person 2)  */}
+        <div className='relative bg-slate-900 rounded-3xl border border-dashed border-white/20 flex items-center justify-center text-slate-500'>
+          <div className='text-center'>
+            <p className='animate-pulse'>
+              Waiting for others to join...
+            </p>
+            
+            <p className='text-xs mt-2 font-mono text-slate-600'>
+              ID: {id}
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* control bar */}
@@ -104,15 +138,15 @@ function MeetingRoom() {
               {camera ? <FaVideo size={20} /> : <FaVideoSlash size={20} />}
             </button>
 
-              {/* TODO: ADD screen share button here later */}
+            {/* TODO: ADD screen share button here later */}
           </div>
 
           {/* room actions  */}
           <div>
             {/* TODO: CHAT button here later */}
             <button
-            onClick={handleLeave}
-            className='bg-red-500 hover:bg-red-600 text-white px-6 py-2.5 rounded-xl font-bold transition-all active:scale-95 shadow-lg shadow-red-500/20'
+              onClick={handleLeave}
+              className="bg-red-500 hover:bg-red-600 text-white px-6 py-2.5 rounded-xl font-bold transition-all active:scale-95 shadow-lg shadow-red-500/20"
             >
               Leave
             </button>
