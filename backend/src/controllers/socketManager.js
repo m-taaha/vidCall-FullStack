@@ -39,6 +39,12 @@ export const connectToSocket = (server) => {
     })
 
 
+    const otherUsers = connections[path].filter((id) => id !== socket.id);
+    io.to(socket.id).emit("all users", 
+      otherUsers
+    )
+
+
 
 
     socket.on("disconnect", () => {
@@ -50,31 +56,6 @@ export const connectToSocket = (server) => {
 };
 
 
-    // //join room event
-    // socket.on("join-room", (path) => {
-    //   if (!connections[path]) {
-    //     connections[path] = []; //initializing room if not created
-    //   }
-
-    //   connections[path].push(socket.id); //saving this socket in the room
-
-    //   timeOnline[socket.id] = new Date(); //track when user joined
-
-    //   //joined the socket.io "room" for easy broadcasting
-    //   socket.join(path);
-
-    //   console.log(`${socket.id} joined the room ${path}`);
-
-    //   //notify others in the room
-    //   socket.to(path).emit("user joined", { socketId: socket.id });
-
-    //   //send back the existing users to this new user (important for WebRTC) - so that new user knows who have already joined
-
-    //   io.to(socket.id).emit(
-    //     "all users",
-    //     connections[path].filter((id) => id !== socket.id)
-    //   );
-    // });
 
     // //passing signaling data between peers as a middle-man
     // socket.on("signal", (toId, message) => {
