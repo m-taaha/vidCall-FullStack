@@ -60,6 +60,20 @@ export const connectToSocket = (server) => {
 
     socket.on("disconnect", () => {
       console.log("User left:", socket.id);
+
+      // loop through all rooms in our conection object
+      for(const path in connections) {
+        // we filter out the disconnected socket.id from teh room's array
+        connections[path] = connections[path].filter((id) => id !== socket.id);
+
+        // if the room now is empty, ew can delete the room entirely to save memory
+        if(connections[path].length === 0) {
+          delete connections[path];
+        } else {
+          // if people are still there, notify them that this user left
+          socket.to(path).emit("user-left", socket.id);
+        }
+      }
     });
   });
 
@@ -67,11 +81,6 @@ export const connectToSocket = (server) => {
 };
 
 
-
-    // //passing signaling data between peers as a middle-man
-    // socket.on("signal", (toId, message) => {
-    //   io.to(toId).emit("signal", socket.id, message);
-    // });
 
     // //chat messages
     // socket.on("chat-message", (data, sender) => {
