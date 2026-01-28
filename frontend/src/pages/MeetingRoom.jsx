@@ -23,7 +23,7 @@ function MeetingRoom() {
   }
   const [peers, setPeers] = useState([]);
 
-  
+
 
 // here we are handling how are we going to manage members - suppose there are already 3 members in the meaning then you joined - then this function will loop through the existing socket id's present in the connection and make a call to all of them one by one - then when you entered once - after you a new user came and entered then here you and the other users present in the connection or meeting will acts as reciever and the new user will act like a caller
   useEffect(() => {
@@ -34,7 +34,25 @@ function MeetingRoom() {
     socketRef.current.on("connect", () => {
       console.log("Connected to server with ID:", socketRef.current.id);
 
-// handle the connect event 
+      const peers = []; // Temporary array to hold our new peer objects
+
+      users.forEach((userID) => {
+    // 1. Create the peer connection
+    const peer = createPeer(userID, socketRef.current.id, stream);
+    
+    peers.push({
+      peerID: userID,
+      peer,
+    });
+  });
+  
+  // 3. Update our React state so the UI can render these users
+  setPeers(peers);
+});
+
+
+
+      // handle the connect event
       socketRef.current.emit("join-room", id);
     });
 
