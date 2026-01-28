@@ -7,10 +7,12 @@ import {
   FaMicrophone,
 } from "react-icons/fa6";
 import { useNavigate, useParams } from 'react-router-dom';
+import {io} from "socket.io-client";
 
 function MeetingRoom() {
   const {audio, setAudio, camera, setCamera} = useMeeting();
   const videoRef = useRef(null);
+  const socketRef = useRef();
   const {id} = useParams();
   const [stream, setStream] = useState(null)
   const navigate = useNavigate();
@@ -20,6 +22,27 @@ function MeetingRoom() {
     audio: audio
   }
 
+
+  useEffect(() => {
+    // initialize the connection backend port 
+    socketRef.current = io("http://localhost:8000");
+    
+
+    socketRef.current.on("connect", () => {
+      console.log("Connected to server with ID:", socketRef.current.id);
+
+// handle the connect event 
+      socketRef.current.emit("join-room", id);
+    });
+
+// cleanup: disconnect when the component unmounts
+    return () => {
+      socketRef.current.disconnect();
+    }
+
+  }, [id]) //re-run if the meeting id changes 
+
+  
   useEffect(() => {
     let localStream;
     const startStream = async() => {
