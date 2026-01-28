@@ -21,13 +21,16 @@ function MeetingRoom() {
     video: camera, 
     audio: audio
   }
+  const [peers, setPeers] = useState([]);
 
+  
 
+// here we are handling how are we going to manage members - suppose there are already 3 members in the meaning then you joined - then this function will loop through the existing socket id's present in the connection and make a call to all of them one by one - then when you entered once - after you a new user came and entered then here you and the other users present in the connection or meeting will acts as reciever and the new user will act like a caller
   useEffect(() => {
     // initialize the connection backend port 
     socketRef.current = io("http://localhost:8000");
     
-
+// here people already there - you are the caller here -
     socketRef.current.on("connect", () => {
       console.log("Connected to server with ID:", socketRef.current.id);
 
