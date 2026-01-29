@@ -143,6 +143,27 @@ function MeetingRoom() {
       });
 
 
+      
+      //  The Signal "Postman" - receiving data from other peers
+      socketRef.current.on("signal", (data) => {
+        const { senderId, signal } = data;
+        const item = peersRef.current.find((p) => p.peerID === senderId);
+
+        if (item) {
+          item.peer.signal(signal);
+        } else {
+          const peer = addPeer(signal, senderId, stream, socketRef);
+          const peerObj = {
+            peerID: senderId,
+            peer,
+          };
+          peersRef.current.push(peerObj);
+          setPeers((prev) => [...prev, peerObj]);
+        }
+      });
+    });
+
+
 
 // cleanup: disconnect when the component unmounts
     return () => {
