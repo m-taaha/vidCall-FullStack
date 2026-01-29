@@ -11,8 +11,10 @@ import {io} from "socket.io-client";
 
 function MeetingRoom() {
   const {audio, setAudio, camera, setCamera} = useMeeting();
+  const [peers, setPeers] = useState([]);
   const videoRef = useRef(null);
   const socketRef = useRef();
+  const peersRef = useRef([]); 
   const {id} = useParams();
   const [stream, setStream] = useState(null)
   const navigate = useNavigate();
@@ -21,49 +23,8 @@ function MeetingRoom() {
     video: camera, 
     audio: audio
   }
-  const [peers, setPeers] = useState([]);
 
-
-
-// here we are handling how are we going to manage members - suppose there are already 3 members in the meaning then you joined - then this function will loop through the existing socket id's present in the connection and make a call to all of them one by one - then when you entered once - after you a new user came and entered then here you and the other users present in the connection or meeting will acts as reciever and the new user will act like a caller
-  useEffect(() => {
-    // initialize the connection backend port 
-    socketRef.current = io("http://localhost:8000");
-    
-// here people already there - you are the caller here -
-    socketRef.current.on("connect", () => {
-      console.log("Connected to server with ID:", socketRef.current.id);
-
-      const peers = []; // Temporary array to hold our new peer objects
-
-      users.forEach((userID) => {
-    // 1. Create the peer connection
-    const peer = createPeer(userID, socketRef.current.id, stream);
-    
-    peers.push({
-      peerID: userID,
-      peer,
-    });
-  });
-  
-  // 3. Update our React state so the UI can render these users
-  setPeers(peers);
-});
-
-
-
-      // handle the connect event
-      socketRef.current.emit("join-room", id);
-    });
-
-// cleanup: disconnect when the component unmounts
-    return () => {
-      socketRef.current.disconnect();
-    }
-
-  }, [id]) //re-run if the meeting id changes 
-
-  
+  //logic to handle user media (CAmera/Mic)
   useEffect(() => {
     let localStream;
     const startStream = async() => {
@@ -99,6 +60,58 @@ function MeetingRoom() {
       stream.getAudioTracks().forEach((track) => (track.enabled = audio))
     }
   }, [camera, audio, stream]);
+
+
+// main signalling effect
+    // here we are handling how are we going to manage members - suppose there are already 3 members in the meaning then you joined - then this function will loop through the existing socket id's present in the connection and make a call to all of them one by one - then when you entered once - after you a new user came and entered then here you and the other users present in the connection or meeting will acts as reciever and the new user will act like a caller
+  useEffect(() => {
+    if(!stream) return; //wait until local camera is ready
+
+
+    // initialize the connection backend port 
+    socketRef.current = io("http://localhost:8000");
+    
+// here people already there - you are the caller here -
+    socketRef.current.on("connect", () => {
+      socketRef.current.on("all users", (users) => {
+        const newPeers = [];
+        users.forEach((userId) => {
+          // Logic for calling existing users
+          const peer = createPeer(
+            userId,
+            socketRef.current.id,
+            stream,
+            socketRef,
+          );
+
+          const peerObj = {
+            peerID: userId,
+            peer,
+          };
+
+          peersRef.current.push(peerObj);
+          newPeers.push(peerObj);
+        });
+
+        setPeers(newPeers); //Update our React state so the UI can render these users
+      });
+
+      // Listening for someone joining AFTER you
+      socketRef.current.on("User joined", (data) => {
+        console.log(
+          "Someone new joined! I should wait for their call.",
+          data.socketId,
+        );
+      });
+
+
+
+// cleanup: disconnect when the component unmounts
+    return () => {
+      socketRef.current.disconnect();
+    }
+
+  }, [id, stream]);
 
 
   // handleLeave
@@ -201,4 +214,4 @@ function MeetingRoom() {
   );
 }
 
-export default MeetingRoom
+export default MeetingRoom;
