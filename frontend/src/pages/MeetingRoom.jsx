@@ -9,6 +9,22 @@ import {
 import { useNavigate, useParams } from 'react-router-dom';
 import {io} from "socket.io-client";
 
+// Helper for when YOU are the caller 
+// We pass socketRef so the peer can send its "business card" (signal) to the server
+function createPeer(userToSignal, callerId, stream, socketRef) {
+  const peer = new Peer({
+    initiator: true, // You start the handshake
+    trickle: false,
+    stream,
+  });
+
+  peer.on("signal", (signal) => {
+    socketRef.current.emit("signal", { userToSignal, callerId, signal });
+  });
+
+  return peer;
+}
+
 function MeetingRoom() {
   const {audio, setAudio, camera, setCamera} = useMeeting();
   const [peers, setPeers] = useState([]);
