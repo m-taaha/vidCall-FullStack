@@ -25,6 +25,28 @@ function createPeer(userToSignal, callerId, stream, socketRef) {
   return peer;
 }
 
+//  Helper for when YOU are the receiver 
+function addPeer(incomingSignal, callerId, stream, socketRef) {
+  const peer = new Peer({
+    initiator: false, // You wait for the handshake
+    trickle: false,
+    stream,
+  });
+
+  peer.on("signal", (signal) => {
+    socketRef.current.emit("signal", { 
+        userToSignal: callerId, 
+        signal, 
+        callerId: socketRef.current.id 
+    });
+  });
+
+  // Accept the caller's signal immediately
+  peer.signal(incomingSignal);
+
+  return peer;
+}
+
 function MeetingRoom() {
   const {audio, setAudio, camera, setCamera} = useMeeting();
   const [peers, setPeers] = useState([]);
