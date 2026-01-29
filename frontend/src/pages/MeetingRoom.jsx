@@ -8,6 +8,7 @@ import {
 } from "react-icons/fa6";
 import { useNavigate, useParams } from 'react-router-dom';
 import {io} from "socket.io-client";
+import Peer from 'simple-peer';
 
 // Helper for when YOU are the caller 
 // We pass socketRef so the peer can send its "business card" (signal) to the server
@@ -143,7 +144,7 @@ function MeetingRoom() {
       });
 
 
-      
+
       //  The Signal "Postman" - receiving data from other peers
       socketRef.current.on("signal", (data) => {
         const { senderId, signal } = data;
