@@ -63,6 +63,16 @@ function MeetingRoom() {
     video: camera, 
     audio: audio
   }
+  const totalParticipants = peers.length + 1;
+  let gridClass = "";
+
+  if(totalParticipants === 1 ) {
+    gridClass = "grid-cols-1";
+  } else if (totalParticipants <= 4) {
+    gridClass = "grid-cols-2";
+  } else{
+    gridClass = "grid-cols-3";
+  }
 
   //logic to handle user media (CAmera/Mic)
   useEffect(() => {
@@ -207,7 +217,7 @@ function MeetingRoom() {
       {/* main video grid */}
       <div
         className={`grid gap-4 h-[calc(100vh-160px)] w-full max-w-7xl mx-auto 
-        ${/* we will add dynamically cahnge this later, but for now; */ "grid-cols-1 md:grid-cols-2"}`}
+        ${gridClass}`}
       >
         {/* local video tile (host- you) */}
         <div className="relative bg-slate-900 rounded-3xl border border-white/10 overflow-hidden shadow-2xl group">
