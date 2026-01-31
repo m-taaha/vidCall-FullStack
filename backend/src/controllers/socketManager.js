@@ -45,10 +45,14 @@ export const connectToSocket = (server) => {
     // the signal - this is a way SDP (Session Description Protocol) - like a digital business card that contains - what does codecs i support, what audio formats i can handle, my security fingerprints - all comes under SDP - to exchange these business card we need a way for one user to send a message to as specific person via our server. that is called signal
 
     // Passing a signalling data between peers as a middleman
-    socket.on("signal", (toId, message) => {
+    socket.on("signal", (data) => {
+      const {userToSignal, signal, callerId} = data;
       // we send the the message to the specific toId
       // but we also include the 'socket.id' of the sender so the reciever knows who to reply to!
-      io.to(toId).emit("signal", socket.id, message);
+      io.to(userToSignal).emit("signal", {
+        senderId: callerId,
+        signal: signal
+      })
     });
 
     //chat messages
