@@ -9,6 +9,7 @@ import {
 import { useNavigate, useParams } from 'react-router-dom';
 import {io} from "socket.io-client";
 import Peer from 'simple-peer';
+import Video from '../components/Video';
 
 // Helper for when YOU are the caller 
 // We pass socketRef so the peer can send its "business card" (signal) to the server
@@ -217,7 +218,9 @@ function MeetingRoom() {
         <div className='relative bg-slate-900 rounded-3xl border border-dashed border-white/20 flex items-center justify-center text-slate-500'>
           <div className='text-center'>
             <p className='animate-pulse'>
-              Waiting for others to join...
+              {peers.map((peerObj) => {
+                <Video key={peerObj.peerID} peer={peerObj.peer} />
+              })}
             </p>
             
             <p className='text-xs mt-2 font-mono text-slate-600'>
