@@ -196,7 +196,7 @@ function MeetingRoom() {
             autoPlay
             playsInline
             muted
-            className="w-full h-full object-cover -scale-x-100" //mirrors my own video
+            className="w-full h-full object-cover -scale-x-100"
           />
 
           {/* overdflow for name/status */}
@@ -206,7 +206,7 @@ function MeetingRoom() {
 
           {/* if camera is off, show placeholder */}
           {!camera && (
-            <div className='absolute inset-0 flex items-center justify-center bg-slate-800'>
+            <div className="absolute inset-0 flex items-center justify-center bg-slate-800">
               <div className="w-24 h-24 bg-slate-700 rounded-full flex items-center justify-center text-3xl font-bold">
                 U
               </div>
@@ -215,19 +215,18 @@ function MeetingRoom() {
         </div>
 
         {/* remote video placeholder (wait for person 2)  */}
-        <div className='relative bg-slate-900 rounded-3xl border border-dashed border-white/20 flex items-center justify-center text-slate-500'>
-          <div className='text-center'>
-            <p className='animate-pulse'>
-              {peers.map((peerObj) => (
-                <Video key={peerObj.peerID} peer={peerObj.peer} />
-              ))}
-            </p>
-            
-            <p className='text-xs mt-2 font-mono text-slate-600'>
-              ID: {id}
-            </p>
+        {peers.map((peerObj) => (
+          <Video key={peerObj.peerID} peer={peerObj.peer} />
+        ))}
+
+        {peers.length === 0 && (
+          <div className="relative bg-slate-900 rounded-3xl border border-dashed border-white/20 flex items-center justify-center text-slate-500">
+            <div className="text-center">
+              <p className="animate-pulse">Waiting for others to join...</p>
+              <p className="text-xs mt-2 font-mono text-slate-600">ID: {id}</p>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* control bar */}
