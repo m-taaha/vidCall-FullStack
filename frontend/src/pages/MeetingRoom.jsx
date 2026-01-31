@@ -167,7 +167,7 @@ function MeetingRoom() {
 
 
     // tell the server you have joined
-    socketRef.current.emit("User Joined", id);
+    socketRef.current.emit("join-room", id);
 
 // cleanup: disconnect when the component unmounts
     return () => {
