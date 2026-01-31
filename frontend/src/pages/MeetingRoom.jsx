@@ -218,9 +218,9 @@ function MeetingRoom() {
         <div className='relative bg-slate-900 rounded-3xl border border-dashed border-white/20 flex items-center justify-center text-slate-500'>
           <div className='text-center'>
             <p className='animate-pulse'>
-              {peers.map((peerObj) => {
+              {peers.map((peerObj) => (
                 <Video key={peerObj.peerID} peer={peerObj.peer} />
-              })}
+              ))}
             </p>
             
             <p className='text-xs mt-2 font-mono text-slate-600'>
