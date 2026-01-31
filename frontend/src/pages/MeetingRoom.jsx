@@ -169,6 +169,26 @@ function MeetingRoom() {
     // tell the server you have joined
     socketRef.current.emit("join-room", id);
 
+
+    // tell the server user has left
+    socketRef.current.on("user-left", (id) => {
+      console.log("User left:", id);
+
+      setPeers((prevPeers) => {
+        const peerObj = prevPeers.find((p) => p.peerID === id);
+
+        if (peerObj) {
+          peerObj.peer.destroy();
+        }
+
+        return prevPeers.filter((p) => p.peerID !== id);
+      });
+
+      // Update the Ref to keep the signaling logic in sync
+      // This prevents us from trying to send signals to a closed connection
+      peersRef.current = peersRef.current.filter((p) => p.peerID !== id);
+    });
+
 // cleanup: disconnect when the component unmounts
     return () => {
       socketRef.current.disconnect();
