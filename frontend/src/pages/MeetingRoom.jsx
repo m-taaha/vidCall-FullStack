@@ -18,6 +18,13 @@ function createPeer(userToSignal, callerId, stream, socketRef) {
     initiator: true, // You start the handshake
     trickle: false,
     stream,
+    config: {
+      iceServers: [
+        {
+          urls: "stun:stun.l.google.com:19302",
+        },
+      ],
+    },
   });
 
   peer.on("signal", (signal) => {
@@ -33,6 +40,13 @@ function addPeer(incomingSignal, callerId, stream, socketRef) {
     initiator: false, // You wait for the handshake
     trickle: false,
     stream,
+    config: {
+      iceServers: [
+        {
+          urls: "stun:stun.l.google.com:19302",
+        },
+      ],
+    },
   });
 
   peer.on("signal", (signal) => {
