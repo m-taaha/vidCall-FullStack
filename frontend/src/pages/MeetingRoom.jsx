@@ -77,9 +77,11 @@ function MeetingRoom() {
     video: camera, 
     audio: audio
   }
+   const [messages, setMessages] = useState([]);
+   const [currentMessage, setCurrentMessage] = useState("");
   const totalParticipants = peers.length + 1;
-  let gridClass = "";
 
+  let gridClass = "";
   if(totalParticipants === 1 ) {
     gridClass = "grid-cols-1";
   } else if (totalParticipants <= 4) {
@@ -87,6 +89,8 @@ function MeetingRoom() {
   } else{
     gridClass = "grid-cols-3";
   }
+
+
 
   //logic to handle user media (CAmera/Mic)
   useEffect(() => {
@@ -194,6 +198,12 @@ function MeetingRoom() {
     socketRef.current.emit("join-room", id);
 
 
+    // message in meetRoom
+    socketRef.current.on("chat-message", (data) => {
+      setMessages((prevMessages) => [...prevMessages, data]);
+    });
+
+
     // tell the server user has left
     socketRef.current.on("user-left", (id) => {
       console.log("User left:", id);
@@ -220,6 +230,24 @@ function MeetingRoom() {
 
   }, [id, stream]);
 
+
+  const sendMessage = () => {
+    if(currentMessage.trim() !== "") {
+      const messageData = {
+        roomId: id,
+        messageText: currentMessage,
+      };
+
+      socketRef.current.emit("chat-message", messageData, "You");
+
+      setMessages((prev) => [...prev, {
+        sender: "You",
+        text: currentMessage
+      }]);
+
+      setCurrentMessage("");
+    }
+  }
 
   // handleLeave
   const handleLeave = () => {
