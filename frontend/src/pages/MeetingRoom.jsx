@@ -5,11 +5,13 @@ import {
   FaVideoSlash,
   FaMicrophoneSlash,
   FaMicrophone,
+  FaMessage,
 } from "react-icons/fa6";
 import { useNavigate, useParams } from 'react-router-dom';
 import {io} from "socket.io-client";
 import Peer from 'simple-peer';
 import Video from '../components/Video';
+import ChatSidebar from '../components/ChatSidebar';
 
 // Helper for when YOU are the caller 
 // We pass socketRef so the peer can send its "business card" (signal) to the server
@@ -79,6 +81,7 @@ function MeetingRoom() {
   }
    const [messages, setMessages] = useState([]);
    const [currentMessage, setCurrentMessage] = useState("");
+   const [showChat, setShowChat] = useState(false);
   const totalParticipants = peers.length + 1;
 
   let gridClass = "";
@@ -255,88 +258,96 @@ function MeetingRoom() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white p-4 pb-32">
-      {/* main video grid */}
-      <div
-        className={`grid gap-4 h-[calc(100vh-160px)] w-full max-w-7xl mx-auto 
-        ${gridClass}`}
-      >
-        {/* local video tile (host- you) */}
-        <div className="relative bg-slate-900 rounded-3xl border border-white/10 overflow-hidden shadow-2xl group">
-          <video
-            ref={videoRef}
-            autoPlay
-            playsInline
-            muted
-            className="w-full h-full object-cover -scale-x-100"
-          />
+    <div className="flex h-screen bg-slate-950 text-white overflow-hidden relative">
+      <div className="flex-1 flex flex-col p-4 relative overflow-hidden">
+        {/* main video grid */}
+        <div
+          className={`grid gap-4 h-[calc(100vh-160px)] w-full mx-auto transition-all duration-300 ${gridClass}`}
+        >
+          {/* local video tile (host- you) */}
+          <div className="relative bg-slate-900 rounded-3xl border border-white/10 overflow-hidden shadow-2xl ">
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              muted
+              className="w-full h-full object-cover -scale-x-100"
+            />
 
-          {/* overdflow for name/status */}
-          <div className="absolute bottom-4 left-4 bg-black/50 backdrop:blur-md px-3 py-1 rounded-lg text-sm border border-white/10">
-            You
+            {/* overdflow for name/status */}
+            <div className="absolute bottom-4 left-4 bg-black/50 backdrop:blur-md px-3 py-1 rounded-lg text-sm border border-white/10">
+              You
+            </div>
+
+            {/* if camera is off, show placeholder */}
+            {!camera && (
+              <div className="absolute inset-0 flex items-center justify-center bg-slate-800">
+                <div className="w-24 h-24 bg-slate-700 rounded-full flex items-center justify-center text-3xl font-bold">
+                  U
+                </div>
+              </div>
+            )}
           </div>
 
-          {/* if camera is off, show placeholder */}
-          {!camera && (
-            <div className="absolute inset-0 flex items-center justify-center bg-slate-800">
-              <div className="w-24 h-24 bg-slate-700 rounded-full flex items-center justify-center text-3xl font-bold">
-                U
+          {/* remote video placeholder (wait for person 2)  */}
+          {peers.map((peerObj) => (
+            <Video key={peerObj.peerID} peer={peerObj.peer} />
+          ))}
+
+          {peers.length === 0 && (
+            <div className="relative bg-slate-900 rounded-3xl border border-dashed border-white/20 flex items-center justify-center text-slate-500">
+              <div className="text-center">
+                <p className="animate-pulse">Waiting for others to join...</p>
+                <p className="text-xs mt-2 font-mono text-slate-600">
+                  ID: {id}
+                </p>
               </div>
             </div>
           )}
         </div>
 
-        {/* remote video placeholder (wait for person 2)  */}
-        {peers.map((peerObj) => (
-          <Video key={peerObj.peerID} peer={peerObj.peer} />
-        ))}
-
-        {peers.length === 0 && (
-          <div className="relative bg-slate-900 rounded-3xl border border-dashed border-white/20 flex items-center justify-center text-slate-500">
-            <div className="text-center">
-              <p className="animate-pulse">Waiting for others to join...</p>
-              <p className="text-xs mt-2 font-mono text-slate-600">ID: {id}</p>
+        {/* control bar */}
+        <div className="absolute not-first-of-type:bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-slate-950 to-transparent z-10">
+          <div className="max-w-4xl mx-auto flex items-center justify-between bg-slate-900/90 backdrop-blur-md p-4 rounded-2xl border border-white/10 shadow-xl">
+            {/* meeting info (left) */}
+            <div className="hidden md:block">
+              <p className="text-sm font-medium text-slate-400">
+                Meeting ID:{" "}
+                <span className="text-blue-400 uppercase">{id}</span>
+              </p>
             </div>
-          </div>
-        )}
-      </div>
 
-      {/* control bar */}
-      <div className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-slate-950 to-transparent">
-        <div className="max-w-4xl mx-auto flex items-center justify-between bg-slate-900/90 backdrop-blur-md p-4 rounded-2xl border border-white/10 shadow-xl">
-          {/* meeting info (left) */}
-          <div className="hidden md:block">
-            <p className="text-sm font-medium text-slate-400">
-              Meeting ID: <span className="text-blue-400 uppercase">{id}</span>
-            </p>
-          </div>
+            {/* Primary controls  */}
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => setAudio(!audio)}
+                className={`p-3 rounded-xl transition-all ${audio ? "bg-slate-800 hover:bg-slate-700" : "bg-red-500 hover:bg-red-600 text-white"}`}
+              >
+                {audio ? (
+                  <FaMicrophone size={20} />
+                ) : (
+                  <FaMicrophoneSlash size={20} />
+                )}
+              </button>
 
-          {/* Primary controls  */}
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => setAudio(!audio)}
-              className={`p-3 rounded-xl transition-all ${audio ? "bg-slate-800 hover:bg-slate-700" : "bg-red-500 hover:bg-red-600 text-white"}`}
-            >
-              {audio ? (
-                <FaMicrophone size={20} />
-              ) : (
-                <FaMicrophoneSlash size={20} />
-              )}
-            </button>
+              <button
+                onClick={() => setCamera(!camera)}
+                className={`p-3 rounded-xl transition-all ${camera ? "bg-slate-800 hover:bg-slate-700" : "bg-red-500 hover:bg-red-600 text-white"}`}
+              >
+                {camera ? <FaVideo size={20} /> : <FaVideoSlash size={20} />}
+              </button>
 
-            <button
-              onClick={() => setCamera(!camera)}
-              className={`p-3 rounded-xl transition-all ${camera ? "bg-slate-800 hover:bg-slate-700" : "bg-red-500 hover:bg-red-600 text-white"}`}
-            >
-              {camera ? <FaVideo size={20} /> : <FaVideoSlash size={20} />}
-            </button>
+              <button
+                onClick={() => setShowChat(!showChat)}
+                className={`p-3 rounded-xl transition-all ${showChat ? "bg-blue-600" : "bg-slate-800"}`}
+              >
+                <FaMessage size={20} />
+              </button>
 
-            {/* TODO: ADD screen share button here later */}
-          </div>
+              {/* TODO: ADD screen share button here later */}
+            </div>
 
-          {/* room actions  */}
-          <div>
-            {/* TODO: CHAT button here later */}
+            {/* room actions  */}
             <button
               onClick={handleLeave}
               className="bg-red-500 hover:bg-red-600 text-white px-6 py-2.5 rounded-xl font-bold transition-all active:scale-95 shadow-lg shadow-red-500/20"
@@ -346,6 +357,15 @@ function MeetingRoom() {
           </div>
         </div>
       </div>
+      {/* chatSidebar */}
+      {showChat && (
+        <ChatSidebar
+          messages={messages}
+          currentMessage={currentMessage}
+          setCurrentMessage={setCurrentMessage}
+          sendMessage={sendMessage}
+        />
+      )}
     </div>
   );
 }
