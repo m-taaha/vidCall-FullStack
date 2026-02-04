@@ -248,29 +248,33 @@ function MeetingRoom() {
     }
   }
 
-  // screen sharing
+  // start screen sharing
   const startScreenShare = async () => {
     try {
       const screen = await navigator.mediaDevices.getDisplayMedia({
-        video: true
+        video: true,
       });
+
+      // SAFETY: Listen for the browser's "Stop Sharing" button
+      screen.getVideoTracks()[0].onended = () => {
+        stopScreenShare(true);
+      };
+
       setScreenStream(screen);
       setIsSharing(true);
 
       // upading the local video element
-      if(videoRef.current) {
+      if (videoRef.current) {
         videoRef.current.srcObject = screen;
       }
 
-      // broadcasting to peers who are connected 
+      // broadcasting to peers who are connected
       const oldTrack = stream.getVideoTracks()[0];
       const newTrack = screen.getVideoTracks()[0];
 
       peers.forEach((peerObj) => {
         peerObj.peer.replaceTrack(oldTrack, newTrack, stream);
       });
-
-
     } catch(error) {
       console.log("Error sharing screen:", err);
     }
