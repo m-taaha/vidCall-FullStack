@@ -262,6 +262,14 @@ function MeetingRoom() {
         videoRef.current.srcObject = screen;
       }
 
+      // broadcasting to peers who are connected 
+      const oldTrack = stream.getVideoTracks()[0];
+      const newTrack = screen.getVideoTracks()[0];
+
+      peers.forEach((peerObj) => {
+        peerObj.peer.replaceTrack(oldTrack, newTrack, stream);
+      });
+
 
     } catch(error) {
       console.log("Error sharing screen:", err);
