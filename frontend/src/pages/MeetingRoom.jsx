@@ -255,6 +255,13 @@ function MeetingRoom() {
         video: true
       });
       setScreenStream(screen);
+      setIsSharing(true);
+
+      // upading the local video element
+      if(videoRef.current) {
+        videoRef.current.srcObject = screen;
+      }
+
 
     } catch(error) {
       console.log("Error sharing screen:", err);
