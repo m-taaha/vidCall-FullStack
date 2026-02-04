@@ -76,6 +76,8 @@ function MeetingRoom() {
    const [messages, setMessages] = useState([]);
    const [currentMessage, setCurrentMessage] = useState("");
    const [showChat, setShowChat] = useState(false);
+   const [screenStream, setScreenStream] = useState(null);
+   const [isSharing, setIsSharing] = useState(false);
   const totalParticipants = peers.length + 1;
 
   let gridClass = "";
@@ -245,6 +247,22 @@ function MeetingRoom() {
       setCurrentMessage("");
     }
   }
+
+  // screen sharing
+  const startScreenShare = async () => {
+    try {
+      const screen = await navigator.mediaDevices.getDisplayMedia({
+        video: true
+      });
+      setScreenStream(screen);
+
+    } catch(error) {
+      console.log("Error sharing screen:", err);
+    }
+  };
+
+
+
 
   // handleLeave
   const handleLeave = () => {
