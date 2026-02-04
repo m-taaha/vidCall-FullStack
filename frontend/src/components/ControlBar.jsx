@@ -5,9 +5,22 @@ import {
   FaMicrophoneSlash,
   FaMicrophone,
   FaMessage,
+  FaDesktop,
 } from "react-icons/fa6";
 
-export default function ControlBar({audio, setAudio, camera, setCamera, showChat, setShowChat, handleLeave, id}) {
+export default function ControlBar({
+  audio,
+  setAudio,
+  camera,
+  setCamera,
+  showChat,
+  setShowChat,
+  handleLeave,
+  id,
+  isSharing,
+  startScreenShare,
+  stopScreenShare,
+}) {
   return (
     <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-slate-950 to-transparent z-10">
       <div className="max-w-4xl mx-auto flex items-center justify-between bg-slate-900/90 backdrop-blur-md p-4 rounded-2xl border border-white/10 shadow-xl">
@@ -45,7 +58,14 @@ export default function ControlBar({audio, setAudio, camera, setCamera, showChat
             <FaMessage size={20} />
           </button>
 
-          {/* TODO: ADD screen share button here later */}
+          <button
+            onClick={isSharing ? stopScreenShare : startScreenShare}
+            className={`p-3 rounded-xl transition-all ${
+              isSharing ? "bg-blue-600" : "bg-slate-800 hover:bg-slate-700"
+            }`}
+          >
+            <FaDesktop size={20} />
+          </button>
         </div>
 
         {/* room actions  */}

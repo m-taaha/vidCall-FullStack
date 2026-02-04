@@ -285,6 +285,7 @@ function MeetingRoom() {
       peerObj.peer.replaceTrack(screenTrack, cameraTrack, stream);
     });
 
+    // physically stop the screen capture in the browser
     screenStream.getTracks().forEach((track) => track.stop());
 
     videoRef.current.srcObject = stream;
@@ -359,6 +360,9 @@ function MeetingRoom() {
         setShowChat={setShowChat}
         handleLeave={handleLeave}
         id={id}
+        isSharing={isSharing}
+        startScreenShare={startScreenShare}
+        stopScreenShare={stopScreenShare}
         />
       </div>
 
