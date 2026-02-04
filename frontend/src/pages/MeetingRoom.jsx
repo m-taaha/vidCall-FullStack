@@ -276,6 +276,21 @@ function MeetingRoom() {
     }
   };
 
+  // stop screen share
+  const stopScreenShare = () => {
+    const screenTrack = screenStream.getVideoTracks()[0];
+    const cameraTrack = stream.getVideoTracks()[0];
+
+    peers.forEach((peerObj) => {
+      peerObj.peer.replaceTrack(screenTrack, cameraTrack, stream);
+    });
+
+    screenStream.getTracks().forEach((track) => track.stop());
+
+    videoRef.current.srcObject = stream;
+    setScreenStream();
+    setIsSharing(false);
+  }
 
 
 
