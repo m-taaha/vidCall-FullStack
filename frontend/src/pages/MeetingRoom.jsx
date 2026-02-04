@@ -282,6 +282,8 @@ function MeetingRoom() {
 
   // stop screen share
   const stopScreenShare = () => {
+    if(!screenStream) return;
+
     const screenTrack = screenStream.getVideoTracks()[0];
     const cameraTrack = stream.getVideoTracks()[0];
 
@@ -294,6 +296,7 @@ function MeetingRoom() {
 
     videoRef.current.srcObject = stream;
     setScreenStream();
+    setScreenStream(null);
     setIsSharing(false);
   }
 
