@@ -272,7 +272,7 @@ function MeetingRoom() {
       const oldTrack = stream.getVideoTracks()[0];
       const newTrack = screen.getVideoTracks()[0];
 
-      peers.forEach((peerObj) => {
+      peersRef.current.forEach((peerObj) => {
         peerObj.peer.replaceTrack(oldTrack, newTrack, stream);
       });
     } catch(error) {
@@ -287,7 +287,7 @@ function MeetingRoom() {
     const screenTrack = screenStream.getVideoTracks()[0];
     const cameraTrack = stream.getVideoTracks()[0];
 
-    peers.forEach((peerObj) => {
+    peersRef.current.forEach((peerObj) => {
       peerObj.peer.replaceTrack(screenTrack, cameraTrack, stream);
     });
 
@@ -321,7 +321,7 @@ function MeetingRoom() {
               autoPlay
               playsInline
               muted
-              className="w-full h-full object-cover -scale-x-100"
+              className={`w-full h-full object-cover ${!isSharing ? "-scale-x-100" : "" }`}
             />
 
             {/* overdflow for name/status */}
