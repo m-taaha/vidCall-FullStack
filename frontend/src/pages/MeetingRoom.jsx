@@ -330,7 +330,7 @@ function MeetingRoom() {
             </div>
 
             {/* if camera is off, show placeholder */}
-            {!camera && (
+            {!camera && !isSharing && (
               <div className="absolute inset-0 flex items-center justify-center bg-slate-800">
                 <div className="w-24 h-24 bg-slate-700 rounded-full flex items-center justify-center text-3xl font-bold">
                   U
