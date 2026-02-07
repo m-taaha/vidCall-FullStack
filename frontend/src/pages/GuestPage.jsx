@@ -5,6 +5,18 @@ function GuestPage() {
   const [guestName, setGuestName] = useState("");
   const [roomCode, setRoomCode] = useState("");
   const navigate = useNavigate();
+
+  // handlejoinMeeting
+  const handleJoinMeeting = () => {
+    if(!roomCode) {
+      alert("Enter Room code");
+    } else if (roomCode.length !== 10) {
+      alert("Room code must be of 10 characters")
+    } else {
+      navigate(`/green-room/${roomCode}`)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center p-6">
       {/* Guest info card */}
@@ -49,6 +61,7 @@ function GuestPage() {
 
           {/* join Button */}
           <button
+          onClick={handleJoinMeeting}
           className='w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-2xl font-bold transition-all active:scale-95 shadow-lg shadow-blue-600/20 mt-4'
           >
             Join Meeting 
