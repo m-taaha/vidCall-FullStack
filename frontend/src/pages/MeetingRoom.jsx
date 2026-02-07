@@ -60,85 +60,72 @@ function addPeer(incomingSignal, callerId, stream, socketRef) {
 }
 
 function MeetingRoom() {
-  const {audio, setAudio, camera, setCamera} = useMeeting();
+  const { audio, setAudio, camera, setCamera } = useMeeting();
   const [peers, setPeers] = useState([]);
   const videoRef = useRef(null);
   const socketRef = useRef();
-  const peersRef = useRef([]); 
-  const {id} = useParams();
-  const [stream, setStream] = useState(null)
+  const peersRef = useRef([]);
+  const { id } = useParams();
+  const [stream, setStream] = useState(null);
   const navigate = useNavigate();
   // meeting constraints
   const constraints = {
-    video: camera, 
-    audio: audio
-  }
-   const [messages, setMessages] = useState([]);
-   const [currentMessage, setCurrentMessage] = useState("");
-   const [showChat, setShowChat] = useState(false);
-   const [screenStream, setScreenStream] = useState(null);
-   const [isSharing, setIsSharing] = useState(false);
+    video: camera,
+    audio: audio,
+  };
+  const [messages, setMessages] = useState([]);
+  const [currentMessage, setCurrentMessage] = useState("");
+  const [showChat, setShowChat] = useState(false);
+  const [screenStream, setScreenStream] = useState(null);
+  const [isSharing, setIsSharing] = useState(false);
   const totalParticipants = peers.length + 1;
 
   let gridClass = "";
-  if(totalParticipants === 1 ) {
+  if (totalParticipants === 1) {
     gridClass = "grid-cols-1";
   } else if (totalParticipants <= 4) {
     gridClass = "grid-cols-2";
-  } else{
+  } else {
     gridClass = "grid-cols-3";
   }
-
-
 
   //logic to handle user media (CAmera/Mic)
   useEffect(() => {
     let localStream;
-    const startStream = async() => {
-      try{
+    const startStream = async () => {
+      try {
         localStream = await navigator.mediaDevices.getUserMedia(constraints);
-        setStream(localStream)
+        setStream(localStream);
 
-        if(videoRef.current) {
+        if (videoRef.current) {
           videoRef.current.srcObject = localStream;
         }
-      }catch (error) {
-        console.error("Error in accessing media devices", error)
+      } catch (error) {
+        console.error("Error in accessing media devices", error);
       }
     };
 
     startStream();
 
-
     // clearn up
     return () => {
-      if(localStream) {
+      if (localStream) {
         localStream.getTracks().forEach((track) => track.stop());
       }
     };
-  }, [])
+  }, []);
 
 
 
-  // track syncning logic
+  // main signalling effect
+  // here we are handling how are we going to manage members - suppose there are already 3 members in the meaning then you joined - then this function will loop through the existing socket id's present in the connection and make a call to all of them one by one - then when you entered once - after you a new user came and entered then here you and the other users present in the connection or meeting will acts as reciever and the new user will act like a caller
   useEffect(() => {
-    if(stream) {
-      stream.getVideoTracks().forEach((track) => (track.enabled = camera));
-      stream.getAudioTracks().forEach((track) => (track.enabled = audio))
-    }
-  }, [camera, audio, stream]);
+    if (!stream) return; //wait until local camera is ready
 
-
-// main signalling effect
-    // here we are handling how are we going to manage members - suppose there are already 3 members in the meaning then you joined - then this function will loop through the existing socket id's present in the connection and make a call to all of them one by one - then when you entered once - after you a new user came and entered then here you and the other users present in the connection or meeting will acts as reciever and the new user will act like a caller
-  useEffect(() => {
-    if(!stream) return; //wait until local camera is ready
-
-
-    // initialize the connection backend port 
+    // initialize the connection backend port
     socketRef.current = io("http://localhost:8000");
-    
-// here people already there - you are the caller here -
+
+    // here people already there - you are the caller here -
     socketRef.current.on("connect", () => {
       socketRef.current.on("all users", (users) => {
         const newPeers = [];
@@ -171,8 +158,6 @@ function MeetingRoom() {
         );
       });
 
-
-
       //  The Signal "Postman" - receiving data from other peers
       socketRef.current.on("signal", (data) => {
         const { senderId, signal } = data;
@@ -192,16 +177,13 @@ function MeetingRoom() {
       });
     });
 
-
     // tell the server you have joined
     socketRef.current.emit("join-room", id);
-
 
     // message in meetRoom
     socketRef.current.on("chat-message", (data) => {
       setMessages((prevMessages) => [...prevMessages, data]);
     });
-
 
     // tell the server user has left
     socketRef.current.on("user-left", (id) => {
@@ -222,16 +204,14 @@ function MeetingRoom() {
       peersRef.current = peersRef.current.filter((p) => p.peerID !== id);
     });
 
-// cleanup: disconnect when the component unmounts
+    // cleanup: disconnect when the component unmounts
     return () => {
       socketRef.current.disconnect();
-    }
-
+    };
   }, [id, stream]);
 
-
   const sendMessage = () => {
-    if(currentMessage.trim() !== "") {
+    if (currentMessage.trim() !== "") {
       const messageData = {
         roomId: id,
         messageText: currentMessage,
@@ -239,14 +219,17 @@ function MeetingRoom() {
 
       socketRef.current.emit("chat-message", messageData, "You");
 
-      setMessages((prev) => [...prev, {
-        sender: "You",
-        text: currentMessage
-      }]);
+      setMessages((prev) => [
+        ...prev,
+        {
+          sender: "You",
+          text: currentMessage,
+        },
+      ]);
 
       setCurrentMessage("");
     }
-  }
+  };
 
   // start screen sharing
   const startScreenShare = async () => {
@@ -275,14 +258,14 @@ function MeetingRoom() {
       peersRef.current.forEach((peerObj) => {
         peerObj.peer.replaceTrack(oldTrack, newTrack, stream);
       });
-    } catch(error) {
+    } catch (error) {
       console.log("Error sharing screen:", err);
     }
   };
 
   // stop screen share
   const stopScreenShare = () => {
-    if(!screenStream) return;
+    if (!screenStream) return;
 
     const screenTrack = screenStream.getVideoTracks()[0];
     const cameraTrack = stream.getVideoTracks()[0];
@@ -298,12 +281,12 @@ function MeetingRoom() {
     setScreenStream();
     setScreenStream(null);
     setIsSharing(false);
-  }
+  };
 
   // toggleCamera hardware-level on off camera and starting a new or old stream based on condition
   const toggleCamera = async () => {
     // turning off: stop tracks and update state
-    if(camera) {
+    if (camera) {
       if (stream) {
         stream.getVideoTracks().forEach((track) => track.stop());
       }
@@ -313,7 +296,7 @@ function MeetingRoom() {
       try {
         const newStream = await navigator.mediaDevices.getUserMedia({
           video: true,
-          audio: audio 
+          audio: audio,
         });
 
         const newVideoTrack = newStream.getVideoTracks()[0];
@@ -328,14 +311,14 @@ function MeetingRoom() {
         } else {
           // this is the first video track fo this session
           // using peer.addTrack() instead of replaceTrack()
-          peersRef.current.forEach(({peer}) => {
+          peersRef.current.forEach(({ peer }) => {
             peer.addTrack(newVideoTrack, stream);
           });
         }
 
         // updating the local visuals
         setStream(newStream);
-        if(videoRef.current) {
+        if (videoRef.current) {
           videoRef.current.srcObject = newStream;
         }
         setCamera(true);
@@ -343,14 +326,60 @@ function MeetingRoom() {
         console.error("Error restarting camera:", error);
       }
     }
-  }
+  };
+
+  // toggleAudio  hardware-level on off audio and starting a new or old stream based on condition
+  const toggleAudio = async () => {
+    if(audio) {
+      // turning off
+      if(stream) {
+        stream.getAudioTracks().forEach(track => track.stop());
+      }
+      setAudio(false);
+    } else {
+      // turning on
+      try {
+        const newStream = await navigator.mediaDevices.getUserMedia({
+          audio: true,
+          video: camera, //keep existing camera state
+        });
+
+        const newAudioTrack = newStream.getAudioTracks()[0];
+        const oldAudioTrack = stream.getAudioTracks()[0];
 
 
+        if (oldAudioTrack) {
+          //  existing track swap
+          // tell all the peers to switch tracks
+          peersRef.current.forEach(({ peer }) => {
+            peer.replaceTrack(oldAudioTrack, newAudioTrack, stream);
+          });
+        } else {
+          // this is the first video track fo this session
+          // using peer.addTrack() instead of replaceTrack()
+          peersRef.current.forEach(({ peer }) => {
+            peer.addTrack(newAudioTrack, stream);
+          });
+        }
+
+        // updating the local visuals
+        setStream(newStream);
+
+
+        if (camera && videoRef.current) {
+          videoRef.current.srcObject = newStream;
+        }
+        setAudio(true);
+      } catch (error) {
+        console.error("Error in restarting microphone", error);
+      }
+    } 
+  };
 
   // handleLeave
   const handleLeave = () => {
-    if(stream) {
-      stream.getTracks().forEach(track => {
+    if (stream) {
+      stream.getTracks().forEach((track) => {
         console.log("Stopping track;", track.kind);
         track.stop();
       });
@@ -360,9 +389,9 @@ function MeetingRoom() {
       videoRef.current.srcObject = null;
     }
 
-    peersRef.current.forEach(p => p.peer.destroy());
-    navigate('/')
-  }
+    peersRef.current.forEach((p) => p.peer.destroy());
+    navigate("/");
+  };
 
   return (
     <div className="flex h-screen bg-slate-950 text-white overflow-hidden relative">
@@ -378,7 +407,7 @@ function MeetingRoom() {
               autoPlay
               playsInline
               muted
-              className={`w-full h-full object-cover ${!isSharing ? "-scale-x-100" : "" }`}
+              className={`w-full h-full object-cover ${!isSharing ? "-scale-x-100" : ""}`}
             />
 
             {/* overdflow for name/status */}
@@ -413,34 +442,33 @@ function MeetingRoom() {
           )}
         </div>
 
-
         {/* control bar */}
-        <ControlBar 
-        audio={audio}
-        setAudio={setAudio}
-        camera={camera}
-        setCamera={toggleCamera}
-        showChat={showChat}
-        setShowChat={setShowChat}
-        handleLeave={handleLeave}
-        id={id}
-        isSharing={isSharing}
-        startScreenShare={startScreenShare}
-        stopScreenShare={stopScreenShare}
+        <ControlBar
+          audio={audio}
+          setAudio={toggleAudio}
+          camera={camera}
+          setCamera={toggleCamera}
+          showChat={showChat}
+          setShowChat={setShowChat}
+          handleLeave={handleLeave}
+          id={id}
+          isSharing={isSharing}
+          startScreenShare={startScreenShare}
+          stopScreenShare={stopScreenShare}
         />
       </div>
 
-
       {/* chatSidebar */}
-      <div className={`transition-all duration-300 ease-in-out border-l border-white/10 bg-slate-900 shadow-xl overflow-hidden 
-        ${showChat ? "w-80 opacity-100" :"w-0 opacity-0 border-none" }`}>
-        
-          <ChatSidebar
-            messages={messages}
-            currentMessage={currentMessage}
-            setCurrentMessage={setCurrentMessage}
-            sendMessage={sendMessage}
-          />
+      <div
+        className={`transition-all duration-300 ease-in-out border-l border-white/10 bg-slate-900 shadow-xl overflow-hidden 
+        ${showChat ? "w-80 opacity-100" : "w-0 opacity-0 border-none"}`}
+      >
+        <ChatSidebar
+          messages={messages}
+          currentMessage={currentMessage}
+          setCurrentMessage={setCurrentMessage}
+          sendMessage={sendMessage}
+        />
       </div>
     </div>
   );
