@@ -31,6 +31,8 @@ function Dashboard() {
     const handleJoinMeeting = () => {
       if(!joinString){
         alert("Meeting code can not be empty.!")
+      } else if (joinString.length !== 10) {
+        alert("Meeting length should be of 10 characters")
       } else {
         navigate(`/green-room/${joinString}`)
       }
