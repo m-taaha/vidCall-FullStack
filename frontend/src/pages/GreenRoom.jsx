@@ -89,7 +89,14 @@ const toggleCamera = async () => {
     // currently OFF - turning on
     //  should fetch a BRAND NEW stream here so that the camera screen doesn't go blank when i start streaming again through my camera
     try {
-      const newStream = await navigate.mediaDevices.getUserMedia(constraints);
+      const newStream = await navigator.mediaDevices.getUserMedia(constraints);
+
+      setStream(newStream)
+      if(videoRef.current) {
+        videoRef.current.srcObject = newStream;
+      }
+      setCamera(true);
+
     } catch(error) {
       console.error("Failed to restart camera", error);
     }
@@ -151,7 +158,7 @@ const handleJoin = () => {
           {/* camera button */}
           <button
             className={`p-4 rounded-full transition-all ${camera ? "bg-slate-800 hover:bg-slate-700" : "bg-red-500 hover:bg-red-600"}`}
-            onClick={() => setCamera(!camera)}
+            onClick={() => setCamera(toggleCamera)}
           >
             {camera ? <FaVideo size={24} /> : <FaVideoSlash size={24} />}
           </button>
