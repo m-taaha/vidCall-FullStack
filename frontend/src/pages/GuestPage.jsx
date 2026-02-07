@@ -36,7 +36,10 @@ function GuestPage() {
           <p className="text-slate-400 mt-2">
             Enter your details to join the call
           </p>
+        </div>
 
+        <div className='space-y-5'>
+          {/* name input */}
           <div className="space-y-2">
             {/* name input  */}
             <label className="text-sm font-medium text-slate-400 ml-1">
@@ -67,10 +70,10 @@ function GuestPage() {
 
           {/* join Button */}
           <button
-          onClick={handleJoinMeeting}
-          className='w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-2xl font-bold transition-all active:scale-95 shadow-lg shadow-blue-600/20 mt-4'
+            onClick={handleJoinMeeting}
+            className="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-2xl font-bold transition-all active:scale-95 shadow-lg shadow-blue-600/20 mt-4"
           >
-            Join Meeting 
+            Join Meeting
           </button>
         </div>
       </div>
