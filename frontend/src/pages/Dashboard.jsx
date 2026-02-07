@@ -27,6 +27,15 @@ function Dashboard() {
       navigate(`/green-room/${id}`)
     }
 
+    // handleJoinMeeting
+    const handleJoinMeeting = () => {
+      if(!joinString){
+        alert("Meeting code can not be empty.!")
+      } else {
+        navigate(`/green-room/${joinString}`)
+      }
+    }
+
 
 
   return (
@@ -111,7 +120,9 @@ function Dashboard() {
                   onChange={handleJoinString}
                 />
 
-                <button className="bg-white/10 hover:bg-white/20 px-6 rounded-xl font-bold transition-colors active:scale-95">
+                <button 
+                onClick={handleJoinMeeting}
+                className="bg-white/10 hover:bg-white/20 px-6 rounded-xl font-bold transition-colors active:scale-95">
                   Join
                 </button>
               </div>
