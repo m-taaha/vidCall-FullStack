@@ -8,12 +8,18 @@ function GuestPage() {
 
   // handlejoinMeeting
   const handleJoinMeeting = () => {
+
+    if(!guestName.trim()) {
+      alert("Please enter your name to join the call.");
+      return;
+    }
     if(!roomCode) {
       alert("Enter Room code");
     } else if (roomCode.length !== 10) {
       alert("Room code must be of 10 characters")
     } else {
-      navigate(`/green-room/${roomCode}`)
+      navigate(`/green-room/${roomCode}`, {state: { name: guestName.trim()} }
+      )
     }
   }
 
