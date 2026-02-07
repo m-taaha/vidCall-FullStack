@@ -300,6 +300,51 @@ function MeetingRoom() {
     setIsSharing(false);
   }
 
+  // toggleCamera hardware-level on off camera and starting a new or old stream based on condition
+  const toggleCamera = async () => {
+    // turning off: stop tracks and update state
+    if(camera) {
+      if (stream) {
+        stream.getVideoTracks().forEach((track) => track.stop());
+      }
+      setCamera(false);
+    } else {
+      // turning on: get freash hardware access
+      try {
+        const newStream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: audio 
+        });
+
+        const newVideoTrack = newStream.getVideoTracks()[0];
+        const oldVideoTrack = stream.getVideoTracks()[0];
+
+        if (oldVideoTrack) {
+          //  existing track swap
+          // tell all the peers to switch tracks
+          peersRef.current.forEach(({ peer }) => {
+            peer.replaceTrack(oldVideoTrack, newVideoTrack, stream);
+          });
+        } else {
+          // this is the first video track fo this session
+          // using peer.addTrack() instead of replaceTrack()
+          peersRef.current.forEach(({peer}) => {
+            peer.addTrack(newVideoTrack, stream);
+          });
+        }
+
+        // updating the local visuals
+        setStream(newStream);
+        if(videoRef.current) {
+          videoRef.current.srcObject = newStream;
+        }
+        setCamera(true);
+      } catch (error) {
+        console.error("Error restarting camera:", error);
+      }
+    }
+  }
+
 
 
   // handleLeave
@@ -374,7 +419,7 @@ function MeetingRoom() {
         audio={audio}
         setAudio={setAudio}
         camera={camera}
-        setCamera={setCamera}
+        setCamera={toggleCamera}
         showChat={showChat}
         setShowChat={setShowChat}
         handleLeave={handleLeave}
