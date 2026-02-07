@@ -304,6 +304,18 @@ function MeetingRoom() {
 
   // handleLeave
   const handleLeave = () => {
+    if(stream) {
+      stream.getTracks().forEach(track => {
+        console.log("Stopping track;", track.kind);
+        track.stop();
+      });
+    }
+
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
+
+    peersRef.current.forEach(p => p.peer.destroy());
     navigate('/')
   }
 
