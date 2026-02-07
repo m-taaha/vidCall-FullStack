@@ -75,10 +75,33 @@ useEffect(() => {
   }
 }, [camera, audio, stream]); 
 
+
+// toggleCamera - handle hardware and stop track
+const toggleCamera = async () => {
+  if(camera) {
+    // currently ON - turning off
+    // need to stop the harware here so that the green light goes off
+    if(stream) {
+      stream.getVideoTracks().forEach(track => track.stop());
+    }
+    setCamera(false);
+  } else {
+    // currently OFF - turning on
+    //  should fetch a BRAND NEW stream here so that the camera screen doesn't go blank when i start streaming again through my camera
+    try {
+      const newStream = await navigate.mediaDevices.getUserMedia(constraints);
+    } catch(error) {
+      console.error("Failed to restart camera", error);
+    }
+  }
+}
+
 // handleJoin
 const handleJoin = () => {
   navigate(`/meeting-room/${id}`);
 }
+
+
 
 
   return (
