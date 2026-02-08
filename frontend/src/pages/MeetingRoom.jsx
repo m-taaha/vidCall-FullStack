@@ -305,7 +305,7 @@ function MeetingRoom() {
         });
 
         const newVideoTrack = newStream.getVideoTracks()[0];
-        const oldVideoTrack = stream.getVideoTracks()[0];
+        const oldVideoTrack = stream?.getVideoTracks()[0];
 
         if (oldVideoTrack) {
           //  existing track swap
