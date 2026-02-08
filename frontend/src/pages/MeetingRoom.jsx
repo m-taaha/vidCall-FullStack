@@ -93,6 +93,11 @@ function MeetingRoom() {
   useEffect(() => {
     let localStream;
     const startStream = async () => {
+      // checking if we acutally need the hardware righ tnow
+      if(!camera && !audio) {
+        console.log("Both camera and mic are off. Skipping hardware request.");
+        return;
+      }
       try {
         localStream = await navigator.mediaDevices.getUserMedia(constraints);
         setStream(localStream);
@@ -252,7 +257,7 @@ function MeetingRoom() {
       }
 
       // broadcasting to peers who are connected
-      const oldTrack = stream.getVideoTracks()[0];
+      const oldTrack = stream ? stream.getVideoTracks()[0] : null;
       const newTrack = screen.getVideoTracks()[0];
 
       peersRef.current.forEach((peerObj) => {
@@ -345,7 +350,7 @@ function MeetingRoom() {
         });
 
         const newAudioTrack = newStream.getAudioTracks()[0];
-        const oldAudioTrack = stream.getAudioTracks()[0];
+        const oldAudioTrack = stream?.getAudioTracks()[0];
 
 
         if (oldAudioTrack) {
