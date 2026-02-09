@@ -5,7 +5,7 @@ import axios from 'axios';
 
 export const AuthContext = createContext();
 const client = axios.create({
-  baseURL: "http://localhost:3000/api/v1/user",
+  baseURL: `${import.meta.env.VITE_BACKEND_URL}/api/v1/user`,
   withCredentials: true, //allowing cookies to be sent/recieved
 });
 
