@@ -27,7 +27,7 @@ export default function ControlBar({
         {/* meeting info (left) */}
         <div className="hidden md:block">
           <p className="text-sm font-medium text-slate-400">
-            Meeting ID: <span className="text-blue-400 uppercase">{id}</span>
+            Meeting ID: <span className="text-blue-400 ">{id}</span>
           </p>
         </div>
 
