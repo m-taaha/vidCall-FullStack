@@ -317,7 +317,7 @@ function MeetingRoom() {
           // this is the first video track fo this session
           // using peer.addTrack() instead of replaceTrack()
           peersRef.current.forEach(({ peer }) => {
-            peer.addTrack(newVideoTrack, stream);
+            peer.addTrack(newVideoTrack, newStream);
           });
         }
 
@@ -363,7 +363,7 @@ function MeetingRoom() {
           // this is the first video track fo this session
           // using peer.addTrack() instead of replaceTrack()
           peersRef.current.forEach(({ peer }) => {
-            peer.addTrack(newAudioTrack, stream);
+            peer.addTrack(newAudioTrack, newStream);
           });
         }
 
