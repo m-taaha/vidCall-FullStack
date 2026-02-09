@@ -91,6 +91,7 @@ function MeetingRoom() {
 
   //logic to handle user media (CAmera/Mic)
   useEffect(() => {
+    let isMounted = true;
     let localStream;
     const startStream = async () => {
       // checking if we acutally need the hardware righ tnow
@@ -99,11 +100,18 @@ function MeetingRoom() {
         return;
       }
       try {
-        localStream = await navigator.mediaDevices.getUserMedia(constraints);
-        setStream(localStream);
+        const s = await navigator.mediaDevices.getUserMedia(constraints);
+        if(!isMounted) {
+          console.log("User left during loading. Stopping ghost tracks.");
+          s.getTracks().forEach(t => t.stop());
+          return;
+        }
+
+        localStream = s;
+        setStream(s);
 
         if (videoRef.current) {
-          videoRef.current.srcObject = localStream;
+          videoRef.current.srcObject = s;
         }
       } catch (error) {
         console.error("Error in accessing media devices", error);
@@ -114,6 +122,7 @@ function MeetingRoom() {
 
     // clearn up
     return () => {
+      isMounted = false;
       if (localStream) {
         localStream.getTracks().forEach((track) => track.stop());
       }
