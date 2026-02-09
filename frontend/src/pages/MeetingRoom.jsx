@@ -137,7 +137,7 @@ function MeetingRoom() {
     if (!stream) return; //wait until local camera is ready
 
     // initialize the connection backend port
-    socketRef.current = io("http://localhost:8000");
+    socketRef.current = io("http://localhost:3000");
 
     // here people already there - you are the caller here -
     socketRef.current.on("connect", () => {
