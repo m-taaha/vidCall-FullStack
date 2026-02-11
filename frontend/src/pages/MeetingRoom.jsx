@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { use, useEffect, useRef, useState } from 'react'
 import { useMeeting } from '../context/MeetingContext'
 import { useNavigate, useParams } from 'react-router-dom';
 import {io} from "socket.io-client";
@@ -96,15 +96,15 @@ function MeetingRoom() {
     let localStream;
     const startStream = async () => {
       // checking if we acutally need the hardware righ tnow
-      if(!camera && !audio) {
+      if (!camera && !audio) {
         console.log("Both camera and mic are off. Skipping hardware request.");
         return;
       }
       try {
         const s = await navigator.mediaDevices.getUserMedia(constraints);
-        if(!isMounted) {
+        if (!isMounted) {
           console.log("User left during loading. Stopping ghost tracks.");
-          s.getTracks().forEach(t => t.stop());
+          s.getTracks().forEach((t) => t.stop());
           return;
         }
 
@@ -131,8 +131,6 @@ function MeetingRoom() {
     };
   }, []);
 
-
-
   // main signalling effect
   // here we are handling how are we going to manage members - suppose there are already 3 members in the meaning then you joined - then this function will loop through the existing socket id's present in the connection and make a call to all of them one by one - then when you entered once - after you a new user came and entered then here you and the other users present in the connection or meeting will acts as reciever and the new user will act like a caller
   useEffect(() => {
@@ -152,70 +150,76 @@ function MeetingRoom() {
       console.log("User left:", id);
       setPeers((prevPeers) => {
         const peerObj = prevPeers.find((p) => p.peerID === id);
-        if(peerObj) peerObj.peer.destroy();
+        if (peerObj) peerObj.peer.destroy();
         return prevPeers.filter((p) => p.peerID !== id);
       });
       peersRef.current = peersRef.current.filter((p) => p.peerID !== id);
     });
-    
-      // only start the video handshake if the camera is ready
-      socketRef.current.on("all users", (users) => {
-        if (!streamRef.current) return;  //wait until the camera is ready
-        const newPeers = [];
-        users.forEach((userId) => {
-          // Logic for calling existing users
-          const peer = createPeer(
-            userId,
-            socketRef.current.id,
-            streamRef.current,
-            socketRef,
-          );
 
-          const peerObj = {
-            peerID: userId,
-            peer,
-          };
-
-          peersRef.current.push(peerObj);
-          newPeers.push(peerObj);
-        });
-
-        setPeers(newPeers); //Update our React state so the UI can render these users
-      });
-
-      // Listening for someone joining AFTER you
-      socketRef.current.on("User joined", (data) => {
-        console.log(
-          "Someone new joined! I should wait for their call.",
-          data.socketId,
+    // only start the video handshake if the camera is ready
+    socketRef.current.on("all users", (users) => {
+      if (!streamRef.current) return; //wait until the camera is ready
+      const newPeers = [];
+      users.forEach((userId) => {
+        // Logic for calling existing users
+        const peer = createPeer(
+          userId,
+          socketRef.current.id,
+          streamRef.current,
+          socketRef,
         );
+
+        const peerObj = {
+          peerID: userId,
+          peer,
+        };
+
+        peersRef.current.push(peerObj);
+        newPeers.push(peerObj);
       });
 
-      //  The Signal "Postman" - receiving data from other peers
-      socketRef.current.on("signal", (data) => {
-        const { senderId, signal } = data;
-        const item = peersRef.current.find((p) => p.peerID === senderId);
-
-        if (item) {
-          item.peer.signal(signal);
-        } else {
-          if (!streamRef.current) return; // Don't answer the call without a camera
-          const peer = addPeer(signal, senderId, streamRef.current, socketRef);
-          const peerObj = {
-            peerID: senderId,
-            peer,
-          };
-          peersRef.current.push(peerObj);
-          setPeers((prev) => [...prev, peerObj]);
-        }
+      setPeers(newPeers); //Update our React state so the UI can render these users
     });
 
-   
+    // Listening for someone joining AFTER you
+    socketRef.current.on("User joined", (data) => {
+      console.log(
+        "Someone new joined! I should wait for their call.",
+        data.socketId,
+      );
+    });
 
-  
+    //  The Signal "Postman" - receiving data from other peers
+    socketRef.current.on("signal", (data) => {
+      const { senderId, signal } = data;
+      const item = peersRef.current.find((p) => p.peerID === senderId);
+
+      if (item) {
+        item.peer.signal(signal);
+      } else {
+        if (!streamRef.current) return; // Don't answer the call without a camera
+        const peer = addPeer(signal, senderId, streamRef.current, socketRef);
+        const peerObj = {
+          peerID: senderId,
+          peer,
+        };
+        peersRef.current.push(peerObj);
+        setPeers((prev) => [...prev, peerObj]);
+      }
+    });
+
     // cleanup: disconnect when the component unmounts
     return () => socketRef.current.disconnect();
-  }, [id,]);
+  }, [id]);
+
+
+  useEffect(() => {
+    // If the socket is connected AND the camera just finished warming up
+    if (socketRef.current && streamRef.current && socketRef.current.connected) {
+      console.log("Camera is ready! Joining room now to start handshake.");
+      socketRef.current.emit("join-room", id);
+    }
+  }, [id, !!stream]); // Triggers when stream goes from null -> actual stream
 
   const sendMessage = () => {
     if (currentMessage.trim() !== "") {
@@ -260,7 +264,7 @@ function MeetingRoom() {
       }
 
       // broadcasting to peers who are connected
-      const oldTrack = stream ? stream.getVideoTracks()[0] : null;
+      const oldTrack = streamRef.current ? streamRef.current.getVideoTracks()[0] : null;
       const newTrack = screen.getVideoTracks()[0];
 
       peersRef.current.forEach((peerObj) => {
@@ -341,10 +345,10 @@ function MeetingRoom() {
 
   // toggleAudio  hardware-level on off audio and starting a new or old stream based on condition
   const toggleAudio = async () => {
-    if(audio) {
+    if (audio) {
       // turning off
-      if(stream) {
-        stream.getAudioTracks().forEach(track => track.stop());
+      if (stream) {
+        stream.getAudioTracks().forEach((track) => track.stop());
       }
       setAudio(false);
     } else {
@@ -357,7 +361,6 @@ function MeetingRoom() {
 
         const newAudioTrack = newStream.getAudioTracks()[0];
         const oldAudioTrack = stream?.getAudioTracks()[0];
-
 
         if (oldAudioTrack) {
           //  existing track swap
@@ -384,7 +387,7 @@ function MeetingRoom() {
       } catch (error) {
         console.error("Error in restarting microphone", error);
       }
-    } 
+    }
   };
 
   // handleLeave
