@@ -158,7 +158,11 @@ function MeetingRoom() {
 
     // only start the video handshake if the camera is ready
     socketRef.current.on("all users", (users) => {
-      if (!streamRef.current) return; //wait until the camera is ready
+      if (!streamRef.current) {
+        //wait until the camera is ready
+        console.log("Stream not ready for 'all users'. Handshake will wait.");
+        return;
+      } 
       const newPeers = [];
       users.forEach((userId) => {
         // Logic for calling existing users
@@ -197,7 +201,11 @@ function MeetingRoom() {
       if (item) {
         item.peer.signal(signal);
       } else {
-        if (!streamRef.current) return; // Don't answer the call without a camera
+        if (!streamRef.current) {
+           // Don't answer the call without a camera
+           console.log("Stream not ready to answer call. Ignoring signal.");
+           return;
+        }
         const peer = addPeer(signal, senderId, streamRef.current, socketRef);
         const peerObj = {
           peerID: senderId,
