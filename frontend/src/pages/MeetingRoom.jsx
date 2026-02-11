@@ -139,15 +139,12 @@ function MeetingRoom() {
     peersRef.current = [];
     setPeers([]);
     pendingUsersRef.current = [];
-    
+
     if(socketRef.current) return; //prevent double connection - because of strict mode 
     // start the socket immediately
     socketRef.current = io(import.meta.env.VITE_BACKEND_URL);
 
-    // here people already there - you are the caller here -
-    socketRef.current.on("connect", () => {
-      socketRef.current.emit("join-room", id);
-    });
+  
 
     socketRef.current.on("chat-message", (data) => {
       setMessages((prevMessages) => [...prevMessages, data]);
