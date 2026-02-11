@@ -4,14 +4,19 @@ function Video({peer}) {
     const ref = useRef();
 
     useEffect(() => {
-        
-        peer.on("stream", (stream) => {
+
+        const handleStream = (stream) => {
             if(ref.current) {
                 ref.current.srcObject = stream;
             }
-        })
-    })
+        };
+        
+        peer.on("stream", handleStream);
 
+        return () => {
+            peer.removeListener("stream", handleStream);
+        };
+    }, [peer]);
 
   return (
     <div>
