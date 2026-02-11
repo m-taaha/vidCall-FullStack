@@ -76,7 +76,7 @@ export const AuthContextProvider = ({children}) => {
             } catch (error) {
                 setUser(null);
                 return {success: false,
-                    message: error.response.data.message || "Error in userGetMe"
+                    message: error.response?.data?.message || "Error in userGetMe"
                 };
             } finally{
                 setLoading(false);
