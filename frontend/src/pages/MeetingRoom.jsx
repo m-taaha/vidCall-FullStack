@@ -65,6 +65,7 @@ function MeetingRoom() {
   const videoRef = useRef(null);
   const socketRef = useRef();
   const peersRef = useRef([]);
+  const streamRef = useRef(null);
   const { id } = useParams();
   const [stream, setStream] = useState(null);
   const navigate = useNavigate();
@@ -109,6 +110,7 @@ function MeetingRoom() {
 
         localStream = s;
         setStream(s);
+        streamRef.current = s;
 
         if (videoRef.current) {
           videoRef.current.srcObject = s;
@@ -158,14 +160,14 @@ function MeetingRoom() {
     
       // only start the video handshake if the camera is ready
       socketRef.current.on("all users", (users) => {
-        if (!stream) return;  //wait until the camera is ready
+        if (!streamRef.current) return;  //wait until the camera is ready
         const newPeers = [];
         users.forEach((userId) => {
           // Logic for calling existing users
           const peer = createPeer(
             userId,
             socketRef.current.id,
-            stream,
+            streamRef.current,
             socketRef,
           );
 
@@ -198,7 +200,7 @@ function MeetingRoom() {
           item.peer.signal(signal);
         } else {
           if (!stream) return; // Don't answer the call without a camera
-          const peer = addPeer(signal, senderId, stream, socketRef);
+          const peer = addPeer(signal, senderId, streamRef.current, socketRef);
           const peerObj = {
             peerID: senderId,
             peer,
@@ -213,7 +215,7 @@ function MeetingRoom() {
   
     // cleanup: disconnect when the component unmounts
     return () => socketRef.current.disconnect();
-  }, [id, !!stream]);
+  }, [id,]);
 
   const sendMessage = () => {
     if (currentMessage.trim() !== "") {
@@ -323,6 +325,8 @@ function MeetingRoom() {
 
         // updating the local visuals
         setStream(newStream);
+        streamRef.current = newStream;
+
         if (videoRef.current) {
           videoRef.current.srcObject = newStream;
         }
