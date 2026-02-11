@@ -84,7 +84,10 @@ export const AuthContextProvider = ({children}) => {
     }
 
     useEffect(() => {
-        checkAuth();
+         const initializeAuth = async () => {
+            await checkAuth();
+         };
+         initializeAuth();
     }, []);
 
     return (
