@@ -99,7 +99,7 @@ function MeetingRoom() {
     let isMounted = true;
     const startStream = async () => {
       try {
-         localStream = await navigator.mediaDevices.getUserMedia(constraints);
+        localStream = await navigator.mediaDevices.getUserMedia(constraints);
         if (!isMounted) {
           console.log("User left during loading. Stopping ghost tracks.");
           localStream.getTracks().forEach((t) => t.stop());
@@ -207,10 +207,14 @@ function MeetingRoom() {
     };
   }, [id]);
 
+  //  Safe join-room when stream becomes ready
   useEffect(() => {
-    if (!socketRef.current || !streamRef.current) return;
+    if (socketRef.current?.connected && streamRef.current) {
+      console.log("Stream ready → joining room safely");
+      socketRef.current.emit("join-room", id);
+    }
+  }, [stream, id]);
 
-    
   const sendMessage = () => {
     if (currentMessage.trim() !== "") {
       const messageData = {
