@@ -199,7 +199,7 @@ function MeetingRoom() {
         if (item) {
           item.peer.signal(signal);
         } else {
-          if (!stream) return; // Don't answer the call without a camera
+          if (!streamRef.current) return; // Don't answer the call without a camera
           const peer = addPeer(signal, senderId, streamRef.current, socketRef);
           const peerObj = {
             peerID: senderId,
@@ -287,6 +287,7 @@ function MeetingRoom() {
     videoRef.current.srcObject = stream;
     setScreenStream();
     setScreenStream(null);
+    streamRef.current = stream;
     setIsSharing(false);
   };
 
@@ -325,8 +326,8 @@ function MeetingRoom() {
 
         // updating the local visuals
         setStream(newStream);
-        streamRef.current = newStream;
 
+        streamRef.current = newStream;
         if (videoRef.current) {
           videoRef.current.srcObject = newStream;
         }
@@ -373,7 +374,7 @@ function MeetingRoom() {
 
         // updating the local visuals
         setStream(newStream);
-
+        streamRef.current = newStream;
 
         if (camera && videoRef.current) {
           videoRef.current.srcObject = newStream;
