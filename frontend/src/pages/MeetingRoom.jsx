@@ -147,6 +147,7 @@ function MeetingRoom() {
     });
 
     socketRef.current.on("user-left", (id) => {
+      console.log("User left:", id);
       setPeers((prevPeers) => {
         const peerObj = prevPeers.find((p) => p.peerID === id);
         if(peerObj) peerObj.peer.destroy();
