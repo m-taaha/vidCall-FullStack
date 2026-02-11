@@ -210,35 +210,7 @@ function MeetingRoom() {
   useEffect(() => {
     if (!socketRef.current || !streamRef.current) return;
 
-    // if we had users waiting before stream was ready
-    if (pendingUsersRef.current.length > 0) {
-      console.log("Processing pending users...");
-
-      const newPeers = [];
-
-      pendingUsersRef.current.forEach((userId) => {
-        if (!streamRef.current) return;
-        const peer = createPeer(
-          userId,
-          socketRef.current.id,
-          streamRef.current,
-          socketRef,
-        );
-
-        const peerObj = {
-          peerID: userId,
-          peer,
-        };
-
-        peersRef.current.push(peerObj);
-        newPeers.push(peerObj);
-      });
-
-      setPeers(newPeers);
-      pendingUsersRef.current = [];
-    }
-  }, [stream]);
-
+    
   const sendMessage = () => {
     if (currentMessage.trim() !== "") {
       const messageData = {
