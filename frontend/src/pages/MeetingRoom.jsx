@@ -134,14 +134,30 @@ function MeetingRoom() {
   // main signalling effect
   // here we are handling how are we going to manage members - suppose there are already 3 members in the meaning then you joined - then this function will loop through the existing socket id's present in the connection and make a call to all of them one by one - then when you entered once - after you a new user came and entered then here you and the other users present in the connection or meeting will acts as reciever and the new user will act like a caller
   useEffect(() => {
-    if (!stream) return; //wait until local camera is ready
-
-    // initialize the connection backend port
+    // start the socket immediately
     socketRef.current = io(import.meta.env.VITE_BACKEND_URL);
 
     // here people already there - you are the caller here -
     socketRef.current.on("connect", () => {
+      socketRef.current.emit("join-room", id);
+    });
+
+    socketRef.current.on("chat-message", (data) => {
+      setMessages((prevMessages) => [...prevMessages, data]);
+    });
+
+    socketRef.current.on("user-left", (id) => {
+      setPeers((prevPeers) => {
+        const peerObj = prevPeers.find((p) => p.peerID === id);
+        if(peerObj) peerObj.peer.destroy();
+        return prevPeers.filter((p) => p.peerID !== id);
+      });
+      peersRef.current = peersRef.current.filter((p) => p.peerID !== id);
+    });
+    
+      // only start the video handshake if the camera is ready
       socketRef.current.on("all users", (users) => {
+        if (!stream) return;  //wait until the camera is ready
         const newPeers = [];
         users.forEach((userId) => {
           // Logic for calling existing users
@@ -180,6 +196,7 @@ function MeetingRoom() {
         if (item) {
           item.peer.signal(signal);
         } else {
+          if (!stream) return; // Don't answer the call without a camera
           const peer = addPeer(signal, senderId, stream, socketRef);
           const peerObj = {
             peerID: senderId,
@@ -188,41 +205,14 @@ function MeetingRoom() {
           peersRef.current.push(peerObj);
           setPeers((prev) => [...prev, peerObj]);
         }
-      });
     });
 
-    // tell the server you have joined
-    socketRef.current.emit("join-room", id);
+   
 
-    // message in meetRoom
-    socketRef.current.on("chat-message", (data) => {
-      setMessages((prevMessages) => [...prevMessages, data]);
-    });
-
-    // tell the server user has left
-    socketRef.current.on("user-left", (id) => {
-      console.log("User left:", id);
-
-      setPeers((prevPeers) => {
-        const peerObj = prevPeers.find((p) => p.peerID === id);
-
-        if (peerObj) {
-          peerObj.peer.destroy();
-        }
-
-        return prevPeers.filter((p) => p.peerID !== id);
-      });
-
-      // Update the Ref to keep the signaling logic in sync
-      // This prevents us from trying to send signals to a closed connection
-      peersRef.current = peersRef.current.filter((p) => p.peerID !== id);
-    });
-
+  
     // cleanup: disconnect when the component unmounts
-    return () => {
-      socketRef.current.disconnect();
-    };
-  }, [id]);
+    return () => socketRef.current.disconnect();
+  }, [id, !!stream]);
 
   const sendMessage = () => {
     if (currentMessage.trim() !== "") {
