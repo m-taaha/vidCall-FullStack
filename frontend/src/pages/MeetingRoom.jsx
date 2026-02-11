@@ -183,26 +183,23 @@ function MeetingRoom() {
 
     // only start the video handshake if the camera is ready
     socketRef.current.on("all users", (users) => {
-      if (!streamRef.current) return;
+   if (!streamRef.current) return;
 
-      const tracks = streamRef.current.getTracks();
-      if (!tracks || tracks.length === 0) return;
-      const newPeers = [];
-      users.forEach((userId) => {
-        // Logic for calling existing users
-      let peer;
-      try {
-        peer = createPeer(
-         userId,
-         socketRef.current.id,
-         streamRef.current,
-        socketRef
-       );
-       } catch (err) {
-          console.error("Peer creation failed:", err);
-          return;
-        }
+   const tracks = streamRef.current.getTracks();
+   if (!tracks || tracks.length === 0) return;
 
+   let peer;
+   try {
+     peer = createPeer(
+       userId,
+       socketRef.current.id,
+       streamRef.current,
+       socketRef,
+     );
+   } catch (err) {
+     console.error("Peer creation failed:", err);
+     return;
+   }
     });
 
     // Listening for someone joining AFTER you
@@ -215,19 +212,18 @@ function MeetingRoom() {
 
     //  The Signal "Postman" - receiving data from other peers
     socketRef.current.on("signal", (data) => {
-      if (!streamRef.current) return;
+   if (!streamRef.current) return;
 
-const tracks = streamRef.current.getTracks();
-if (!tracks || tracks.length === 0) return;
+   const tracks = streamRef.current.getTracks();
+   if (!tracks || tracks.length === 0) return;
 
-let peer;
-try {
-  peer = addPeer(signal, senderId, streamRef.current, socketRef);
-} catch (err) {
-  console.error("AddPeer failed:", err);
-  return;
-}
-
+   let peer;
+   try {
+     peer = addPeer(signal, senderId, streamRef.current, socketRef);
+   } catch (err) {
+     console.error("AddPeer failed:", err);
+     return;
+   }
     });
 
     // cleanup: disconnect when the component unmounts
@@ -237,6 +233,38 @@ try {
     }
   }, [id]);
 
+
+  useEffect(() => {
+    if(!socketRef.current || !streamRef.current) return;
+
+    // if we had users waiting before stream was ready
+    if(pendingUsersRef.current.length > 0) {
+      console.log("Processing pending users...");
+
+      const newPeers = [];
+
+      pendingUsersRef.current.forEach((userId) => {
+          if (!streamRef.current) return;
+        const peer = createPeer(
+          userId,
+          socketRef.current.id,
+          streamRef.current,
+        socketRef
+      );
+      
+            const peerObj = {
+              peerID: userId,
+              peer,
+            };
+
+            peersRef.current.push(peerObj);
+            newPeers.push(peerObj);
+      });
+
+      setPeers(newPeers);
+      pendingUsersRef.current = [];
+    }
+  }, [stream]); 
 
   const sendMessage = () => {
     if (currentMessage.trim() !== "") {
