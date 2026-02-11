@@ -6,6 +6,7 @@ import Peer from 'simple-peer';
 import Video from '../components/Video';
 import ChatSidebar from '../components/ChatSidebar';
 import ControlBar from '../components/ControlBar';
+import { FaStackOverflow } from 'react-icons/fa6';
 
 // Helper for when YOU are the caller 
 // We pass socketRef so the peer can send its "business card" (signal) to the server
@@ -65,6 +66,7 @@ function MeetingRoom() {
   const videoRef = useRef(null);
   const socketRef = useRef();
   const peersRef = useRef([]);
+  const pendingUsersRef = useRef([]);
   const streamRef = useRef(null);
   const { id } = useParams();
   const [stream, setStream] = useState(null);
@@ -161,7 +163,8 @@ function MeetingRoom() {
     socketRef.current.on("all users", (users) => {
       if (!streamRef.current) {
         //wait until the camera is ready
-        console.log("Stream not ready for 'all users'. Handshake will wait.");
+        console.log("Stream not ready. Saving users for later.");
+        pendingUsersRef.current = users;
         return;
       } 
       const newPeers = [];
@@ -218,17 +221,43 @@ function MeetingRoom() {
     });
 
     // cleanup: disconnect when the component unmounts
-    return () => socketRef.current.disconnect();
+    return () => {
+      socketRef.current?.disconnect();
+      socketRef.current = null;
+    }
   }, [id]);
 
 
   useEffect(() => {
-    // If the socket is connected AND the camera just finished warming up
-    if (socketRef.current && streamRef.current && socketRef.current.connected) {
-      console.log("Camera is ready! Joining room now to start handshake.");
-      socketRef.current.emit("join-room", id);
+    if(!socketRef.current || !streamRef.current) return;
+
+    // if we had users waiting before stream was ready
+    if(pendingUsersRef.current.length > 0) {
+      console.log("Processing pending users...");
+
+      const newPeers = [];
+
+      pendingUsersRef.current.forEach((userId) => {
+        const peer = createPeer(
+          userId,
+          socketRef.current.id,
+          streamRef.current,
+        socketRef
+      );
+      
+            const peerObj = {
+              peerID: userId,
+              peer,
+            };
+
+            peersRef.current.push(peerObj);
+            newPeers.push(peerObj);
+      });
+
+      setPeers(newPeers);
+      pendingUsersRef.current = [];
     }
-  }, [id, !!stream]); // Triggers when stream goes from null -> actual stream
+  }, [stream]); 
 
   const sendMessage = () => {
     if (currentMessage.trim() !== "") {
