@@ -252,6 +252,7 @@ function MeetingRoom() {
 
       setScreenStream(screen);
       setIsSharing(true);
+      streamRef.current = screen;
 
       // upading the local video element
       if (videoRef.current) {
