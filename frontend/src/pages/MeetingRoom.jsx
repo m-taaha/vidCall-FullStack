@@ -1,4 +1,4 @@
-import React, { use, useEffect, useRef, useState } from 'react'
+import React, {useEffect, useRef, useState } from 'react'
 import { useMeeting } from '../context/MeetingContext'
 import { useNavigate, useParams } from 'react-router-dom';
 import {io} from "socket.io-client";
@@ -71,7 +71,6 @@ function MeetingRoom() {
   const [stream, setStream] = useState(null);
   const navigate = useNavigate();
 
-
   // meeting constraints
   const constraints = {
     video: camera,
@@ -101,7 +100,8 @@ function MeetingRoom() {
     let isMounted = true;
     const startStream = async () => {
       try {
-        const localStream = await navigator.mediaDevices.getUserMedia(constraints);
+        const localStream =
+          await navigator.mediaDevices.getUserMedia(constraints);
         if (!isMounted) {
           console.log("User left during loading. Stopping ghost tracks.");
           localStream.getTracks().forEach((t) => t.stop());
@@ -130,30 +130,7 @@ function MeetingRoom() {
     };
   }, []);
 
-  
-
-  useEffect(() => {
-
-
-    // Validate stream has tracks
-    const tracks = streamRef.current.getTracks();
-    if (!tracks || tracks.length === 0) return;
-
-    if (!socketRef.current) {
-      socketRef.current = io(import.meta.env.VITE_BACKEND_URL);
-    }
-
-    if (!socketRef.current.connected) {
-      socketRef.current.connect();
-    }
-
-    console.log("Stream ready → joining room");
-
-    socketRef.current.emit("join-room", id);
-  }, [stream]);
-
-
-  // main signalling effect
+  // main signalling effect -- socket + webrtc effect
   // here we are handling how are we going to manage members - suppose there are already 3 members in the meaning then you joined - then this function will loop through the existing socket id's present in the connection and make a call to all of them one by one - then when you entered once - after you a new user came and entered then here you and the other users present in the connection or meeting will acts as reciever and the new user will act like a caller
   useEffect(() => {
     // Reset
@@ -164,18 +141,16 @@ function MeetingRoom() {
 
     const socket = socketRef.current;
 
-    socket.on("chat-message", (data) => {
-      setMessages((prev) => [...prev, data]);
+    socket.on("connect", () => {
+      console.log("Socket connected:", socket.id);
+
+      if (streamRef.current) {
+        socket.emit("join-room", id);
+      }
     });
 
-    socket.on("user-left", (id) => {
-      setPeers((prevPeers) => {
-        const peerObj = prevPeers.find((p) => p.peerID === id);
-        if (peerObj) peerObj.peer.destroy();
-        return prevPeers.filter((p) => p.peerID !== id);
-      });
-
-      peersRef.current = peersRef.current.filter((p) => p.peerID !== id);
+    socket.on("chat-message", (data) => {
+      setMessages((prev) => [...prev, data]);
     });
 
     socket.on("all users", (users) => {
@@ -217,44 +192,72 @@ function MeetingRoom() {
       }
     });
 
+    socket.on("user-left", (leftId) => {
+      setPeers((prevPeers) => {
+        const peerObj = prevPeers.find((p) => p.peerID === leftId);
+
+        if (peerObj) peerObj.peer.destroy();
+
+        return prevPeers.filter((p) => p.peerID !== leftId);
+      });
+
+      peersRef.current = peersRef.current.filter((p) => p.peerID !== leftId);
+    });
+
     return () => {
       socket.disconnect();
     };
   }, [id]);
 
+  useEffect(() => {
+    // Validate stream has tracks
+    const tracks = streamRef.current.getTracks();
+    if (!tracks || tracks.length === 0) return;
 
+    if (!socketRef.current) {
+      socketRef.current = io(import.meta.env.VITE_BACKEND_URL);
+    }
+
+    if (!socketRef.current.connected) {
+      socketRef.current.connect();
+    }
+
+    console.log("Stream ready → joining room");
+
+    socketRef.current.emit("join-room", id);
+  }, [stream]);
 
   useEffect(() => {
-    if(!socketRef.current || !streamRef.current) return;
+    if (!socketRef.current || !streamRef.current) return;
 
     // if we had users waiting before stream was ready
-    if(pendingUsersRef.current.length > 0) {
+    if (pendingUsersRef.current.length > 0) {
       console.log("Processing pending users...");
 
       const newPeers = [];
 
       pendingUsersRef.current.forEach((userId) => {
-          if (!streamRef.current) return;
+        if (!streamRef.current) return;
         const peer = createPeer(
           userId,
           socketRef.current.id,
           streamRef.current,
-        socketRef
-      );
-      
-            const peerObj = {
-              peerID: userId,
-              peer,
-            };
+          socketRef,
+        );
 
-            peersRef.current.push(peerObj);
-            newPeers.push(peerObj);
+        const peerObj = {
+          peerID: userId,
+          peer,
+        };
+
+        peersRef.current.push(peerObj);
+        newPeers.push(peerObj);
       });
 
       setPeers(newPeers);
       pendingUsersRef.current = [];
     }
-  }, [stream]); 
+  }, [stream]);
 
   const sendMessage = () => {
     if (currentMessage.trim() !== "") {
@@ -299,7 +302,9 @@ function MeetingRoom() {
       }
 
       // broadcasting to peers who are connected
-      const oldTrack = streamRef.current ? streamRef.current.getVideoTracks()[0] : null;
+      const oldTrack = streamRef.current
+        ? streamRef.current.getVideoTracks()[0]
+        : null;
       const newTrack = screen.getVideoTracks()[0];
 
       peersRef.current.forEach((peerObj) => {
