@@ -222,7 +222,7 @@ function MeetingRoom() {
     return () => {
       socketRef.current.disconnect();
     };
-  }, [id, stream]);
+  }, [id]);
 
   const sendMessage = () => {
     if (currentMessage.trim() !== "") {
