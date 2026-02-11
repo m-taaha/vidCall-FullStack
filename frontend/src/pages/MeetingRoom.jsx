@@ -133,6 +133,27 @@ function MeetingRoom() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!streamRef.current) return;
+
+    // Validate stream has tracks
+    const tracks = streamRef.current.getTracks();
+    if (!tracks || tracks.length === 0) return;
+
+    if (!socketRef.current) {
+      socketRef.current = io(import.meta.env.VITE_BACKEND_URL);
+    }
+
+    if (!socketRef.current.connected) {
+      socketRef.current.connect();
+    }
+
+    console.log("Stream ready → joining room");
+
+    socketRef.current.emit("join-room", id);
+  }, [stream]);
+
+
   // main signalling effect
   // here we are handling how are we going to manage members - suppose there are already 3 members in the meaning then you joined - then this function will loop through the existing socket id's present in the connection and make a call to all of them one by one - then when you entered once - after you a new user came and entered then here you and the other users present in the connection or meeting will acts as reciever and the new user will act like a caller
   useEffect(() => {
