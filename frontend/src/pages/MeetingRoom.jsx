@@ -65,7 +65,6 @@ function MeetingRoom() {
   const videoRef = useRef(null);
   const socketRef = useRef();
   const peersRef = useRef([]);
-  const pendingUsersRef = useRef([]);
   const streamRef = useRef(null);
   const { id } = useParams();
   const [stream, setStream] = useState(null);
@@ -100,8 +99,7 @@ function MeetingRoom() {
     let isMounted = true;
     const startStream = async () => {
       try {
-        const localStream =
-          await navigator.mediaDevices.getUserMedia(constraints);
+         localStream = await navigator.mediaDevices.getUserMedia(constraints);
         if (!isMounted) {
           console.log("User left during loading. Stopping ghost tracks.");
           localStream.getTracks().forEach((t) => t.stop());
@@ -208,24 +206,6 @@ function MeetingRoom() {
       socket.disconnect();
     };
   }, [id]);
-
-  useEffect(() => {
-    // Validate stream has tracks
-    const tracks = streamRef.current.getTracks();
-    if (!tracks || tracks.length === 0) return;
-
-    if (!socketRef.current) {
-      socketRef.current = io(import.meta.env.VITE_BACKEND_URL);
-    }
-
-    if (!socketRef.current.connected) {
-      socketRef.current.connect();
-    }
-
-    console.log("Stream ready → joining room");
-
-    socketRef.current.emit("join-room", id);
-  }, [stream]);
 
   useEffect(() => {
     if (!socketRef.current || !streamRef.current) return;
