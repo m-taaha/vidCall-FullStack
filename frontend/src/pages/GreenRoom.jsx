@@ -158,7 +158,7 @@ const handleJoin = () => {
           {/* camera button */}
           <button
             className={`p-4 rounded-full transition-all ${camera ? "bg-slate-800 hover:bg-slate-700" : "bg-red-500 hover:bg-red-600"}`}
-            onClick={() => setCamera(toggleCamera)}
+            onClick={() => toggleCamera()}
           >
             {camera ? <FaVideo size={24} /> : <FaVideoSlash size={24} />}
           </button>
