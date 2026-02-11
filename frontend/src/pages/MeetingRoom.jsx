@@ -267,7 +267,7 @@ function MeetingRoom() {
         peerObj.peer.replaceTrack(oldTrack, newTrack, stream);
       });
     } catch (error) {
-      console.log("Error sharing screen:", err);
+      console.log("Error sharing screen:", error);
     }
   };
 
@@ -286,7 +286,6 @@ function MeetingRoom() {
     screenStream.getTracks().forEach((track) => track.stop());
 
     videoRef.current.srcObject = stream;
-    setScreenStream();
     setScreenStream(null);
     streamRef.current = stream;
     setIsSharing(false);
