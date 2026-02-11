@@ -183,32 +183,26 @@ function MeetingRoom() {
 
     // only start the video handshake if the camera is ready
     socketRef.current.on("all users", (users) => {
-      if (!streamRef.current) {
-        //wait until the camera is ready
-        console.log("Stream not ready. Saving users for later.");
-        pendingUsersRef.current = users;
-        return;
-      } 
+      if (!streamRef.current) return;
+
+      const tracks = streamRef.current.getTracks();
+      if (!tracks || tracks.length === 0) return;
       const newPeers = [];
       users.forEach((userId) => {
         // Logic for calling existing users
-        const peer = createPeer(
-          userId,
-          socketRef.current.id,
-          streamRef.current,
-          socketRef,
-        );
+      let peer;
+      try {
+        peer = createPeer(
+         userId,
+         socketRef.current.id,
+         streamRef.current,
+        socketRef
+       );
+       } catch (err) {
+          console.error("Peer creation failed:", err);
+          return;
+        }
 
-        const peerObj = {
-          peerID: userId,
-          peer,
-        };
-
-        peersRef.current.push(peerObj);
-        newPeers.push(peerObj);
-      });
-
-      setPeers(newPeers); //Update our React state so the UI can render these users
     });
 
     // Listening for someone joining AFTER you
@@ -221,25 +215,19 @@ function MeetingRoom() {
 
     //  The Signal "Postman" - receiving data from other peers
     socketRef.current.on("signal", (data) => {
-      const { senderId, signal } = data;
-      const item = peersRef.current.find((p) => p.peerID === senderId);
+      if (!streamRef.current) return;
 
-      if (item) {
-        item.peer.signal(signal);
-      } else {
-        if (!streamRef.current) {
-           // Don't answer the call without a camera
-           console.log("Stream not ready to answer call. Ignoring signal.");
-           return;
-        }
-        const peer = addPeer(signal, senderId, streamRef.current, socketRef);
-        const peerObj = {
-          peerID: senderId,
-          peer,
-        };
-        peersRef.current.push(peerObj);
-        setPeers((prev) => [...prev, peerObj]);
-      }
+const tracks = streamRef.current.getTracks();
+if (!tracks || tracks.length === 0) return;
+
+let peer;
+try {
+  peer = addPeer(signal, senderId, streamRef.current, socketRef);
+} catch (err) {
+  console.error("AddPeer failed:", err);
+  return;
+}
+
     });
 
     // cleanup: disconnect when the component unmounts
@@ -249,38 +237,6 @@ function MeetingRoom() {
     }
   }, [id]);
 
-
-  useEffect(() => {
-    if(!socketRef.current || !streamRef.current) return;
-
-    // if we had users waiting before stream was ready
-    if(pendingUsersRef.current.length > 0) {
-      console.log("Processing pending users...");
-
-      const newPeers = [];
-
-      pendingUsersRef.current.forEach((userId) => {
-          if (!streamRef.current) return;
-        const peer = createPeer(
-          userId,
-          socketRef.current.id,
-          streamRef.current,
-        socketRef
-      );
-      
-            const peerObj = {
-              peerID: userId,
-              peer,
-            };
-
-            peersRef.current.push(peerObj);
-            newPeers.push(peerObj);
-      });
-
-      setPeers(newPeers);
-      pendingUsersRef.current = [];
-    }
-  }, [stream]); 
 
   const sendMessage = () => {
     if (currentMessage.trim() !== "") {
