@@ -6,7 +6,6 @@ import Peer from 'simple-peer';
 import Video from '../components/Video';
 import ChatSidebar from '../components/ChatSidebar';
 import ControlBar from '../components/ControlBar';
-import { FaStackOverflow } from 'react-icons/fa6';
 
 // Helper for when YOU are the caller 
 // We pass socketRef so the peer can send its "business card" (signal) to the server
@@ -71,16 +70,20 @@ function MeetingRoom() {
   const { id } = useParams();
   const [stream, setStream] = useState(null);
   const navigate = useNavigate();
+
+
   // meeting constraints
   const constraints = {
     video: camera,
     audio: audio,
   };
+
   const [messages, setMessages] = useState([]);
   const [currentMessage, setCurrentMessage] = useState("");
   const [showChat, setShowChat] = useState(false);
   const [screenStream, setScreenStream] = useState(null);
   const [isSharing, setIsSharing] = useState(false);
+
   const totalParticipants = peers.length + 1;
 
   let gridClass = "";
@@ -92,30 +95,24 @@ function MeetingRoom() {
     gridClass = "grid-cols-3";
   }
 
-  //logic to handle user media (CAmera/Mic)
+  //logic to handle user media (CAmera/Mic) -- media stream effect
   useEffect(() => {
-    let isMounted = true;
     let localStream;
+    let isMounted = true;
     const startStream = async () => {
-      // checking if we acutally need the hardware righ tnow
-      if (!camera && !audio) {
-        console.log("Both camera and mic are off. Skipping hardware request.");
-        return;
-      }
       try {
-        const s = await navigator.mediaDevices.getUserMedia(constraints);
+        const localStream = await navigator.mediaDevices.getUserMedia(constraints);
         if (!isMounted) {
           console.log("User left during loading. Stopping ghost tracks.");
-          s.getTracks().forEach((t) => t.stop());
+          localStream.getTracks().forEach((t) => t.stop());
           return;
         }
 
-        localStream = s;
-        setStream(s);
-        streamRef.current = s;
+        setStream(localStream);
+        streamRef.current = localStream;
 
         if (videoRef.current) {
-          videoRef.current.srcObject = s;
+          videoRef.current.srcObject = localStream;
         }
       } catch (error) {
         console.error("Error in accessing media devices", error);
@@ -133,8 +130,10 @@ function MeetingRoom() {
     };
   }, []);
 
+  
+
   useEffect(() => {
-    if (!streamRef.current) return;
+
 
     // Validate stream has tracks
     const tracks = streamRef.current.getTracks();
@@ -157,81 +156,72 @@ function MeetingRoom() {
   // main signalling effect
   // here we are handling how are we going to manage members - suppose there are already 3 members in the meaning then you joined - then this function will loop through the existing socket id's present in the connection and make a call to all of them one by one - then when you entered once - after you a new user came and entered then here you and the other users present in the connection or meeting will acts as reciever and the new user will act like a caller
   useEffect(() => {
+    // Reset
     peersRef.current = [];
     setPeers([]);
-    pendingUsersRef.current = [];
 
-    if(socketRef.current) return; //prevent double connection - because of strict mode 
-    // start the socket immediately
     socketRef.current = io(import.meta.env.VITE_BACKEND_URL);
 
-  
+    const socket = socketRef.current;
 
-    socketRef.current.on("chat-message", (data) => {
-      setMessages((prevMessages) => [...prevMessages, data]);
+    socket.on("chat-message", (data) => {
+      setMessages((prev) => [...prev, data]);
     });
 
-    socketRef.current.on("user-left", (id) => {
-      console.log("User left:", id);
+    socket.on("user-left", (id) => {
       setPeers((prevPeers) => {
         const peerObj = prevPeers.find((p) => p.peerID === id);
         if (peerObj) peerObj.peer.destroy();
         return prevPeers.filter((p) => p.peerID !== id);
       });
+
       peersRef.current = peersRef.current.filter((p) => p.peerID !== id);
     });
 
-    // only start the video handshake if the camera is ready
-    socketRef.current.on("all users", (users) => {
-   if (!streamRef.current) return;
+    socket.on("all users", (users) => {
+      if (!streamRef.current) return;
 
-   const tracks = streamRef.current.getTracks();
-   if (!tracks || tracks.length === 0) return;
+      const newPeers = [];
 
-   let peer;
-   try {
-     peer = createPeer(
-       userId,
-       socketRef.current.id,
-       streamRef.current,
-       socketRef,
-     );
-   } catch (err) {
-     console.error("Peer creation failed:", err);
-     return;
-   }
+      users.forEach((userId) => {
+        const peer = createPeer(
+          userId,
+          socket.id,
+          streamRef.current,
+          socketRef,
+        );
+
+        const peerObj = { peerID: userId, peer };
+
+        peersRef.current.push(peerObj);
+        newPeers.push(peerObj);
+      });
+
+      setPeers(newPeers);
     });
 
-    // Listening for someone joining AFTER you
-    socketRef.current.on("User joined", (data) => {
-      console.log(
-        "Someone new joined! I should wait for their call.",
-        data.socketId,
-      );
+    socket.on("signal", ({ senderId, signal }) => {
+      const existingPeer = peersRef.current.find((p) => p.peerID === senderId);
+
+      if (existingPeer) {
+        existingPeer.peer.signal(signal);
+      } else {
+        if (!streamRef.current) return;
+
+        const peer = addPeer(signal, senderId, streamRef.current, socketRef);
+
+        const peerObj = { peerID: senderId, peer };
+
+        peersRef.current.push(peerObj);
+        setPeers((prev) => [...prev, peerObj]);
+      }
     });
 
-    //  The Signal "Postman" - receiving data from other peers
-    socketRef.current.on("signal", (data) => {
-   if (!streamRef.current) return;
-
-   const tracks = streamRef.current.getTracks();
-   if (!tracks || tracks.length === 0) return;
-
-   let peer;
-   try {
-     peer = addPeer(signal, senderId, streamRef.current, socketRef);
-   } catch (err) {
-     console.error("AddPeer failed:", err);
-     return;
-   }
-    });
-
-    // cleanup: disconnect when the component unmounts
     return () => {
-      socketRef.current?.disconnect();
-      socketRef.current = null;
-    }
+      socket.disconnect();
+    };
   }, [id]);
+
 
 
   useEffect(() => {
