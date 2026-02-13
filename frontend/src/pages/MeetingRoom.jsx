@@ -10,6 +10,11 @@ import ControlBar from '../components/ControlBar';
 // Helper for when YOU are the caller 
 // We pass socketRef so the peer can send its "business card" (signal) to the server
 function createPeer(userToSignal, callerId, stream, socketRef) {
+  if (!stream || !stream.getTracks || stream.getTracks().length === 0) {
+    console.log("❌ Invalid stream passed to Peer:", stream);
+    return;
+  }
+
   const peer = new Peer({
     initiator: true, // You start the handshake
     trickle: false,
@@ -32,6 +37,11 @@ function createPeer(userToSignal, callerId, stream, socketRef) {
 
 //  Helper for when YOU are the receiver 
 function addPeer(incomingSignal, callerId, stream, socketRef) {
+  if (!stream || !stream.getTracks || stream.getTracks().length === 0) {
+    console.log("❌ Invalid stream passed to Peer:", stream);
+    return;
+  }
+  
   const peer = new Peer({
     initiator: false, // You wait for the handshake
     trickle: false,
