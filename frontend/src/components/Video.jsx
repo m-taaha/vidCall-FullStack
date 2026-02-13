@@ -10,7 +10,7 @@ function Video({peer}) {
                 ref.current.srcObject = stream;
             }
         };
-        
+         
         peer.on("stream", handleStream);
 
         return () => {

@@ -154,6 +154,12 @@ function MeetingRoom() {
     socket.on("all users", (users) => {
       if (!streamRef.current) return;
 
+      const tracks = streamRef.current.getTracks();
+      if(!tracks || tracks.length === 0) {
+        console.log("Stream has no tracks yet.");
+        return;
+      }
+
       const newPeers = [];
 
       users.forEach((userId) => {
@@ -174,6 +180,15 @@ function MeetingRoom() {
     });
 
     socket.on("signal", ({ senderId, signal }) => {
+      if(!streamRef.current) return;
+
+      const tracks = streamRef.current.getTracks();
+      if(!tracks || tracks.length === 0) {
+        console.log("Cannot process signal - no media tracks yet.");
+        return;
+      }
+
+
       const existingPeer = peersRef.current.find((p) => p.peerID === senderId);
 
       if (existingPeer) {
