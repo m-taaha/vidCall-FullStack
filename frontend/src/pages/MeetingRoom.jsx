@@ -151,10 +151,6 @@ function MeetingRoom() {
 
     socket.on("connect", () => {
       console.log("Socket connected:", socket.id);
-
-      if (streamRef.current) {
-        socket.emit("join-room", id);
-      }
     });
 
     socket.on("chat-message", (data) => {
