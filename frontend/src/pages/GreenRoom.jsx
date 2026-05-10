@@ -63,16 +63,6 @@ useEffect(() => {
     stream.getVideoTracks().forEach((track) => (track.enabled = camera));
     stream.getAudioTracks().forEach((track) => (track.enabled = audio));
   }
-
-  // clean up function
-  return () => {
-    if(stream) {
-      stream.getTracks().forEach((track) => {
-        console.log("GreenRoom cleanup: Stopping track", track.kind);
-        track.stop();
-      });
-    }
-  }
 }, [camera, audio, stream]); 
 
 
