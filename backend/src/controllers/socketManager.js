@@ -56,23 +56,22 @@ export const connectToSocket = (server) => {
     });
 
     //chat messages
-    socket.on("chat-message", (data, sender) => {
-      const { roomId, messageText } = data;
+  socket.on("chat-message", (data) => {
+    // remove `sender` arg
+    const { roomId, messageText } = data;
 
-      if (!message[roomId]) {
-        message[roomId] = []; // initialize message - if not exists
-      }
-
-      //save message in memory
-      message[roomId].push({
-        sender,
-        text: messageText,
-        time: new Date(),
-      });
-
-      //broadcast to all in room
-      socket.to(roomId).emit("chat-message", { sender, text: messageText });
+    if (!message[roomId]) message[roomId] = [];
+    message[roomId].push({
+      sender: socket.id,
+      text: messageText,
+      time: new Date(),
     });
+
+    // Broadcast with the real socket.id as sender
+    socket
+      .to(roomId)
+      .emit("chat-message", { sender: socket.id, text: messageText });
+  });
 
 
 
