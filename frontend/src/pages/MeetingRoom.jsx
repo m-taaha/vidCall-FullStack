@@ -262,39 +262,28 @@ function MeetingRoom() {
   };
 
   // start screen sharing
-  const startScreenShare = async () => {
-    try {
-      const screen = await navigator.mediaDevices.getDisplayMedia({
-        video: true,
-      });
+ const startScreenShare = async () => {
+  try {
+    const screen = await navigator.mediaDevices.getDisplayMedia({ video: true });
+    screen.getVideoTracks()[0].onended = () => stopScreenShare();
 
-      // SAFETY: Listen for the browser's "Stop Sharing" button
-      screen.getVideoTracks()[0].onended = () => {
-        stopScreenShare(true);
-      };
+  // Capture old track BEFORE overwriting streamRef
+   const oldTrack = stream?.getVideoTracks()[0] ?? null;
+    const newTrack = screen.getVideoTracks()[0];
 
-      setScreenStream(screen);
-      setIsSharing(true);
-      streamRef.current = screen;
+    setScreenStream(screen);
+    setIsSharing(true);
+    streamRef.current = screen;
 
-      // upading the local video element
-      if (videoRef.current) {
-        videoRef.current.srcObject = screen;
-      }
+    if (videoRef.current) videoRef.current.srcObject = screen;
 
-      // broadcasting to peers who are connected
-      const oldTrack = streamRef.current
-        ? streamRef.current.getVideoTracks()[0]
-        : null;
-      const newTrack = screen.getVideoTracks()[0];
-
-      peersRef.current.forEach((peerObj) => {
-        peerObj.peer.replaceTrack(oldTrack, newTrack, stream);
-      });
-    } catch (error) {
-      console.log("Error sharing screen:", error);
-    }
-  };
+    peersRef.current.forEach((peerObj) => {
+      peerObj.peer.replaceTrack(oldTrack, newTrack, stream);
+    });
+  } catch (error) {
+    console.log("Error sharing screen:", error);
+  }
+};
 
   // stop screen share
   const stopScreenShare = () => {
