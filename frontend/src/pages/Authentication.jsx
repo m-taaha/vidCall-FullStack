@@ -19,7 +19,7 @@ function Authentication() {
   // const [error, setError] = useState();
 
 //using authcontext and destructuring the objects from authcontext -
-    const {loading, register , login , user} = useAuth(AuthContext);
+ const { loading, register, login, user } = useAuth();
 
     // applying auth guard if a user is already logged in keep the user away from the logged in page or register 
     useEffect(() => {
