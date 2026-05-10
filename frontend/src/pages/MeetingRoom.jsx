@@ -242,9 +242,7 @@ function MeetingRoom() {
         roomId: id,
         messageText: currentMessage,
       };
-
-      socketRef.current.emit("chat-message", messageData, "You");
-
+      
       setMessages((prev) => [
         ...prev,
         {
