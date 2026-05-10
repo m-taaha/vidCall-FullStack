@@ -112,7 +112,8 @@ export const userLogout = async (req, res) => {
     sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     expires: new Date(0),
   });
-}
+return res.status(200).json({ message: "Logged out successfully" });
+};
 
 export const userGetMe =  async (req, res) => {
   try{
