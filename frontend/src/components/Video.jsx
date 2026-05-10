@@ -19,15 +19,15 @@ function Video({peer}) {
     }, [peer]);
 
   return (
-    <div>
-        <video 
+    <div className="relative bg-slate-900 rounded-3xl border border-white/10 overflow-hidden shadow-2xl h-full w-full">
+      <video
         playsInline
         autoPlay
         ref={ref}
-        className='w-full h-full object-cover'
-        />
+        className="w-full h-full object-cover -scale-x-100"
+      />
     </div>
-  )
+  );
 }
 
 export default Video
